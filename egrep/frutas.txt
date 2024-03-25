@@ -1,0 +1,7 @@
+banana
+manzana
+sandia
+melon
+frutilla
+tomate
+palta
