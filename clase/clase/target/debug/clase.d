@@ -1,0 +1,1 @@
+/home/mari/Escritorio/tp1_taller/clase/clase/target/debug/clase: /home/mari/Escritorio/tp1_taller/clase/clase/src/lib.rs /home/mari/Escritorio/tp1_taller/clase/clase/src/main.rs /home/mari/Escritorio/tp1_taller/clase/clase/src/regex.rs
