@@ -6,7 +6,7 @@ fn main() {
         "ab.*c"
     );
 
-    let value = "juan dice el abecedario: abccccccd"; 
+    let value = "abccccccd"; 
     //hayq ue ver si algo de lo que consumi puedo haber consumido antes para lograr llegar a la c
 
     match regex.unwrap().test(value) {
