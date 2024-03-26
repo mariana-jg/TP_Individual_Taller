@@ -4,15 +4,15 @@ use crate::step_regex::StepRegex;
 use crate::caracter::Caracter;
 use crate::repeticion::Repeticion;
 use crate::step_evaluado::StepEvaluado;
+use crate::errors::Error;
 
 pub struct Regex {
     pasos: Vec<StepRegex>
 }
 
-
 impl Regex {
 
-    pub fn new(expression: &str) -> Result<Self, &str> {
+    pub fn new(expression: &str) -> Result<Self, Error> {
 
         let mut steps: Vec<StepRegex> = Vec::new();
         let mut chars_iter = expression.chars();
@@ -29,12 +29,22 @@ impl Regex {
                     repeticiones: Repeticion::Exacta(1),
                     caracter_interno: Caracter::Literal(c),
                 }),    
+
+                'A'..='Z' => Some(StepRegex {
+                    repeticiones: Repeticion::Exacta(1),
+                    caracter_interno: Caracter::Literal(c),
+                }),
                 
+                '0'..='9' => Some(StepRegex {
+                    repeticiones: Repeticion::Exacta(1),
+                    caracter_interno: Caracter::Literal(c),
+                }),
+
                 '*' => {
                     if let Some(last) = steps.last_mut() {
                         last.repeticiones = Repeticion::Alguna;
                     } else {
-                        return Err("* invalido");
+                        return Err(Error::CaracterNoProcesable);
                     }
                     None
                 },   
@@ -44,10 +54,10 @@ impl Regex {
                         repeticiones: Repeticion::Exacta(1),
                         caracter_interno: Caracter::Literal(literal),
                     }),
-                    None => return Err("Caracter no valido.")
+                    None => return Err(Error::CaracterNoProcesable)
                 },
                 
-                _ => return Err("Caracter no valido."),
+                _ => return Err(Error::CaracterNoProcesable),
             
             };
 
@@ -60,9 +70,9 @@ impl Regex {
     }
 
 
-    pub fn test(self, linea: &str) -> Result<bool, &str> {
+    pub fn es_valida(self, linea: &str) -> Result<bool, Error> {
         if !linea.is_ascii() {
-            return Err("No es ASCII");
+            return Err(Error::FormatoDeLineaNoASCII);
         }
 
         let mut queue: VecDeque<StepRegex> = VecDeque::from(self.pasos);
@@ -78,7 +88,7 @@ impl Regex {
                     for _ in [0..n] {
                         let avance = paso.caracter_interno.coincide(&linea[index..]);
 
-                        if avance == 0 { //puedo encontrar la coincidencia mas adelante
+                        if avance == 0 {
                             match backtrack(paso, &mut stack, &mut queue) {
                                 Some(size) => {
                                     index -= size;
@@ -126,11 +136,9 @@ impl Regex {
 
 }
 
-fn backtrack (
-    current : StepRegex,
-    evaluated: &mut Vec<StepEvaluado>,
-    next: &mut VecDeque<StepRegex>,)
-     -> Option<usize> {
+//como funciona backtrack?
+fn backtrack (current: StepRegex, evaluated: &mut Vec<StepEvaluado>, next: &mut VecDeque<StepRegex>,)
+    -> Option<usize> {
         let mut back_size =  0; 
         next.push_front(current);
         while let Some(e) = evaluated.pop() {
@@ -143,4 +151,34 @@ fn backtrack (
             }
         }
         None
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test01_regex_con_literales() {
+        let regex = Regex::new("abc");
+        assert_eq!(regex.unwrap().es_valida("abcdefg").unwrap(), true);
+    }
+
+    #[test]
+    fn test02_regex_con_comodin() {
+        let regex = Regex::new("ab.c");
+        assert_eq!(regex.unwrap().es_valida("abccdefg").unwrap(), true);
+    }
+
+    #[test]
+    fn test03_regex_con_asterisk() {
+        let regex = Regex::new("ab*c");
+        assert_eq!(regex.unwrap().es_valida("abccccccccdefcg").unwrap(), true);
+    }
+
+    #[test]
+    fn test02_regex_con_metacaracter_con_backlash() {
+        let regex = Regex::new("a\\*");
+        assert_eq!(regex.unwrap().es_valida("a*cds").unwrap(), true);
+    }
+
 }
