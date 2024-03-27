@@ -40,6 +40,15 @@ impl Regex {
                     caracter_interno: Caracter::Literal(c),
                 }),
 
+                '?' => {
+                    if let Some(last) = steps.last_mut() {
+                        last.repeticiones = Repeticion::Rango { min: Some(0), max: Some(1) };
+                    } else {
+                        return Err(Error::CaracterNoProcesable);
+                    }
+                    None
+                },   
+
                 '*' => {
                     if let Some(last) = steps.last_mut() {
                         last.repeticiones = Repeticion::Alguna;
@@ -48,6 +57,26 @@ impl Regex {
                     }
                     None
                 },   
+
+                '+' => {
+                    if let Some(last) = steps.last_mut() {
+                        last.repeticiones = Repeticion::Rango { min: Some(1), max: None };
+                    } else {
+                        return Err(Error::CaracterNoProcesable);
+                    }
+                    None
+                }, 
+                
+
+               /*  '&' => {
+                    if let Some(last) = steps.last_mut() {
+                        last.repeticiones = Repeticion::Rango { min: Some(3), max: Some(4) };
+                    } else {
+                        return Err(Error::CaracterNoProcesable);
+                    }
+                    None
+                },  */
+
 
                 '\\' => match chars_iter.next() {
                     Some(literal) => Some(StepRegex {
@@ -84,7 +113,6 @@ impl Regex {
 
                 Repeticion::Exacta(n) => {
                     let mut match_size = 0;
-
                     for _ in [0..n] {
                         let avance = paso.caracter_interno.coincide(&linea[index..]);
 
@@ -127,10 +155,10 @@ impl Regex {
                         }
                     }
                 },
-                Repeticion::Rango { min, max } => return Ok(false),
+                Repeticion::Rango { min, max } => 
+                    return Ok(false),
             }
         }
-
         Ok(true)
     }
 
@@ -166,19 +194,25 @@ mod tests {
     #[test]
     fn test02_regex_con_comodin() {
         let regex = Regex::new("ab.c");
-        assert_eq!(regex.unwrap().es_valida("abccdefg").unwrap(), true);
+        assert_eq!(regex.unwrap().es_valida("abcccccdefg").unwrap(), false);
     }
 
     #[test]
     fn test03_regex_con_asterisk() {
         let regex = Regex::new("ab*c");
-        assert_eq!(regex.unwrap().es_valida("abccccccccdefcg").unwrap(), true);
+        assert_eq!(regex.unwrap().es_valida("abcccccdefcg").unwrap(), true);
     }
 
     #[test]
-    fn test02_regex_con_metacaracter_con_backlash() {
+    fn test04_regex_con_metacaracter_con_backlash() {
         let regex = Regex::new("a\\*");
         assert_eq!(regex.unwrap().es_valida("a*cds").unwrap(), true);
+    }
+
+    #[test]
+    fn test05_regex_con_repeticiones_dentro_de_rango() {
+        let regex = Regex::new("aaa+");
+        assert_eq!(regex.unwrap().es_valida("pa").unwrap(), true);
     }
 
 }
