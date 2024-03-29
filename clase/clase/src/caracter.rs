@@ -1,6 +1,6 @@
 use crate::clase_char::ClaseChar;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 
 pub enum Caracter {
     Literal(char), //es un caracter "normal"
