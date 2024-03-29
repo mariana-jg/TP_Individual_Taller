@@ -1,5 +1,4 @@
 use std::collections::VecDeque;
-use std::f32::consts::E;
 use std::str::Chars;
 
 use crate::step_regex::StepRegex;
@@ -43,26 +42,31 @@ pub fn agregar_pasos(steps: &mut Vec<StepRegex>,  chars_iter: &mut Chars<'_>) ->
                 
             
             '{' => {    
+                //de la repeticion funciona la exacta y la repe de "al menos"
                 if let Some(last) = steps.last_mut() {
+                    let mut cantidad = 0;
+                    let mut hay_coma = false;
                     while let Some(c) = chars_iter.next() {
                         if c == '}' {
-                            break;
-                        } else if c.is_digit(10) {
-                            match c.to_digit(10) {
-                                Some(cant) =>
-                                    last.repeticiones = Repeticion::Exacta(cant as usize),
-                                   // last.repeticiones = Repeticion::Rango{min: Some(cant as usize), max: None};
-
-                                None => return Err(Error::CaracterNoProcesable),
-                            }
+                            break;    
+                        } else if c == ',' {
+                            hay_coma = true;
+                            //last.repeticiones = Repeticion::Rango{min: Some(cantidad as usize), max: None};
                         } else {
-                            return Err(Error::CaracterNoProcesable);
+                            match c.to_string().parse::<usize>() {
+                                Ok(cant) => 
+                                    cantidad = cant,
+                                    //last.repeticiones = Repeticion::Exacta(cant as usize),
+                                    //last.repeticiones = Repeticion::Rango{min: Some(cant as usize), max: None}},
+                                Err(_) => return Err(Error::CaracterNoProcesable),
+                            }
                         }
-                    }
-                        
-                } else {
-                    return Err(Error::CaracterNoProcesable);
-                }
+                        if !hay_coma {
+                            last.repeticiones = Repeticion::Exacta(cantidad as usize);
+                        } else {
+                            last.repeticiones = Repeticion::Rango{min: Some(cantidad as usize), max: None};
+                        }
+            }}
                 None
             },
 
@@ -214,26 +218,28 @@ impl Regex {
                     }
                 },
                 Repeticion::Rango { min, max } => {
-                    println!("{}", "holaaa");
-                    let min = match min {
+                    let min = match min { //bien sacada
                         Some(min) => min,
                         None => 0,
                     };
                     
-                    let max = match max {
+                    let max = match max { //bien sacado
                         Some(max) => max,
                         None => linea.len() - index, 
                     };   
 
+                    println!("min: {}, max: {}", min, max);
+                    
                     let mut match_size = 0;
-                    for _ in min..max {
+                    let mut cantidad_veces = 0;
+                    for _ in min..linea.len() - index + 1 {
                         let avance = paso.caracter_interno.coincide(&linea[index..]);
-                        println!("hay coincidencia: {:?}", paso.caracter_interno);
+                        println!("hay coincidencia: {:?}, con una cantidad de: {}", paso.caracter_interno, cantidad_veces);
                         if avance == 0 {
-                            
                             match backtrack(paso, &mut stack, &mut queue) {
                                 Some(size) => {
                                     index -= size;
+                                    cantidad_veces = 0;
                                     continue 'pasos;
                                 }
                                 None => {
@@ -241,10 +247,21 @@ impl Regex {
                                 }
                             }
                         } else {
-                            match_size += avance;
-                            index += avance; 
+                            cantidad_veces += 1;
+                            index += avance;
+
                         }
+                        if cantidad_veces > min && cantidad_veces <= linea.len() - index{
+                            match_size += avance;
+                            
+                        } 
+
                     }
+
+                    println!("al final, se repitio {} veces", cantidad_veces ) ;
+                    if cantidad_veces < min || cantidad_veces > max {
+                        return Ok(false);     
+                    }    
 
                     stack.push(StepEvaluado {
                         paso: paso,
@@ -252,10 +269,7 @@ impl Regex {
                         backtrackable: false,
                     });
 
-                },
-                    
-
-            }}
+            }}}
         Ok(true)
     }
 

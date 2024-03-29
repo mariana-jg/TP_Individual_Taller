@@ -10,7 +10,7 @@ pub enum Caracter {
 
 impl Caracter {
     pub fn coincide (&self, value: &str) -> usize {
-
+        println!("Caracter::coincide({:?}, {:?})", self, value);
         match self {
             Caracter::Literal(l) => {
                 if value.chars().next() == Some(*l) {

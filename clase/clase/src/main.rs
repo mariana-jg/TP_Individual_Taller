@@ -4,7 +4,7 @@ fn main() {
 
     let regex = Regex::new("ho{3,}la");
 
-    let value = "hoola"; 
+    let value = "hooooooooooola"; 
     //hayq ue ver si algo de lo que consumi puedo haber consumido antes para lograr llegar a la c
 
     match regex.unwrap().es_valida(value) {
