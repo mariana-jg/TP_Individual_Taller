@@ -11,15 +11,20 @@ pub struct Regex {
     pasos: Vec<StepRegex>,
     //anchorings: Anchoring,
 }
+
+
 //[abcd] o [a-d] o [a-dA-Dp-s] => [a,b,c,d] o [a,-,d]
-fn conseguir_lista(chars_iter: &mut Chars<'_>) -> Vec<char> {
+fn conseguir_lista(chars_iter: &mut Chars<'_>) -> (Vec<char>,bool) {
     let mut auxiliar: Vec<char> = Vec::new();
     let mut contenido: Vec<char> = Vec::new();
     let mut hay_guion = false;
+    let mut es_negado = false;
 
     while let Some(c) = chars_iter.next() {
         if c == ']' {
             break;
+        } else if c == '^' {
+            es_negado = true;
         } else {
             auxiliar.push(c);
         }
@@ -52,8 +57,8 @@ fn conseguir_lista(chars_iter: &mut Chars<'_>) -> Vec<char> {
         contenido.push(c);
     }*/
 
-    println!("{:?}", contenido);
-    contenido
+    println!("{:?}, {:?}", contenido, es_negado);
+    (contenido, es_negado)
 }
 
 pub fn agregar_pasos(
@@ -63,22 +68,22 @@ pub fn agregar_pasos(
     while let Some(c) = chars_iter.next() {
         let step = match c {
             '.' => Some(StepRegex {
-                repeticiones: Repeticion::Exacta(1),
+                repeticiones: Repeticion::Exacta(1, false),
                 caracter_interno: Caracter::Wildcard,
             }),
 
             'a'..='z' => Some(StepRegex {
-                repeticiones: Repeticion::Exacta(1),
+                repeticiones: Repeticion::Exacta(1, false),
                 caracter_interno: Caracter::Literal(c),
             }),
 
             'A'..='Z' => Some(StepRegex {
-                repeticiones: Repeticion::Exacta(1),
+                repeticiones: Repeticion::Exacta(1, false),
                 caracter_interno: Caracter::Literal(c),
             }),
 
             '0'..='9' => Some(StepRegex {
-                repeticiones: Repeticion::Exacta(1),
+                repeticiones: Repeticion::Exacta(1, false),
                 caracter_interno: Caracter::Literal(c),
             }),
 
@@ -120,7 +125,7 @@ pub fn agregar_pasos(
                             };
                         }
                     } else if contenido.len() == 1 && contenido[0].is_ascii_digit() {
-                        last.repeticiones = Repeticion::Exacta(rangos[0]);
+                        last.repeticiones = Repeticion::Exacta(rangos[0], false);
                     } else {
                         return Err(Error::CaracterNoProcesable);
                     }
@@ -128,10 +133,11 @@ pub fn agregar_pasos(
                 None
             }
 
-            '[' => Some(StepRegex {
-                repeticiones: Repeticion::Exacta(1),
-                caracter_interno: Caracter::Lista(conseguir_lista(chars_iter)),
-            }),
+            '[' => {let contenido = conseguir_lista(chars_iter);
+                Some(StepRegex {
+                repeticiones: Repeticion::Exacta(1, contenido.1),
+                caracter_interno: Caracter::Lista(contenido.0),
+            })},
 
             '?' => {
                 if let Some(last) = steps.last_mut() {
@@ -168,7 +174,7 @@ pub fn agregar_pasos(
 
             '\\' => match chars_iter.next() {
                 Some(literal) => Some(StepRegex {
-                    repeticiones: Repeticion::Exacta(1),
+                    repeticiones: Repeticion::Exacta(1, false),
                     caracter_interno: Caracter::Literal(literal),
                 }),
                 None => return Err(Error::CaracterNoProcesable),
@@ -233,7 +239,8 @@ impl Regex {
 
         'pasos: while let Some(paso) = queue.pop_front() {
             match paso.repeticiones {
-                Repeticion::Exacta(n) => {
+                Repeticion::Exacta(n, negacion) => {
+                    println!("en este caso, estoy negando: {}", negacion);
                     let mut match_size = 0;
                     for _ in 0..n {
                         let avance = paso.caracter_interno.coincide(&linea[index..]);
@@ -244,12 +251,18 @@ impl Regex {
                                     index -= size;
                                     continue 'pasos;
                                 }
-                                None => return Ok(false),
+                                None => if negacion {
+                                    return Ok(true);
+                                } else {
+                                    return Ok(false);
+                                }
+                                
                             }
                         } else {
                             match_size += avance;
                             index += avance;
                         }
+  
                     }
 
                     stack.push(StepEvaluado {
@@ -257,6 +270,9 @@ impl Regex {
                         match_size: match_size,
                         backtrackable: false,
                     });
+                    if negacion {
+                        return Ok(false);
+                    } 
                 }
                 Repeticion::Alguna => {
                     let mut sigo_avanzando = true;
@@ -500,6 +516,12 @@ mod tests {
     fn test27_regex_combinado() {
         let regex = Regex::new("ho[a-dA-Cx-z]");
         assert_eq!(regex.unwrap().es_valida("hoXa").unwrap(), false);
+    }
+
+    #[test]
+    fn test28_regex_combinado() {
+        let regex = Regex::new("ho[^a-dA-Cx-z]");
+        assert_eq!(regex.unwrap().es_valida("hoXa").unwrap(), true);
     }
   
 }
