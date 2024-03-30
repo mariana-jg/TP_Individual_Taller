@@ -1,10 +1,9 @@
 use clase::regex::Regex;
 
 fn main() {
-    let regex = Regex::new("ho{,9}la");
+    let regex = Regex::new("ho[lmn]a");
 
-    let value = "hoooooooooola";
-    //hayq ue ver si algo de lo que consumi puedo haber consumido antes para lograr llegar a la c
+    let value = "hola";
 
     match regex.unwrap().es_valida(value) {
         Ok(result) => println!("Result: {}", result),

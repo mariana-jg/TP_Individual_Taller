@@ -11,6 +11,50 @@ pub struct Regex {
     pasos: Vec<StepRegex>,
     //anchorings: Anchoring,
 }
+//[abcd] o [a-d] o [a-dA-Dp-s] => [a,b,c,d] o [a,-,d]
+fn conseguir_lista(chars_iter: &mut Chars<'_>) -> Vec<char> {
+    let mut auxiliar: Vec<char> = Vec::new();
+    let mut contenido: Vec<char> = Vec::new();
+    let mut hay_guion = false;
+
+    while let Some(c) = chars_iter.next() {
+        if c == ']' {
+            break;
+        } else {
+            auxiliar.push(c);
+        }
+    }
+
+    for i in 0..auxiliar.len() {
+        if auxiliar[i] == '-' {
+            hay_guion = true;
+            let inicio = auxiliar[i - 1];
+            let fin = auxiliar[i + 1];
+            for c in inicio..=fin {
+                contenido.push(c);
+            }
+        }        }
+
+        if !hay_guion {
+        for i in 0..auxiliar.len() {
+                    contenido.push(auxiliar[i]);
+            }        
+        }
+    /*if !hay_guion {
+        for i in 0..auxiliar.len() {
+            contenido.push(auxiliar[i]);
+        }
+        return contenido;
+    }
+    let inicio = auxiliar[0];
+    let fin = auxiliar[auxiliar.len() - 1];
+    for c in inicio..=fin {
+        contenido.push(c);
+    }*/
+
+    println!("{:?}", contenido);
+    contenido
+}
 
 pub fn agregar_pasos(
     steps: &mut Vec<StepRegex>,
@@ -40,6 +84,7 @@ pub fn agregar_pasos(
 
             //'$' => {return None},
             '{' => {
+
                 if let Some(last) = steps.last_mut() {
                     let mut contenido: Vec<char> = Vec::new();
                     let mut rangos: Vec<usize> = Vec::new();
@@ -74,7 +119,7 @@ pub fn agregar_pasos(
                                 max: Some(rangos[1]),
                             };
                         }
-                    } else if contenido.len() == 1 {
+                    } else if contenido.len() == 1 && contenido[0].is_ascii_digit() {
                         last.repeticiones = Repeticion::Exacta(rangos[0]);
                     } else {
                         return Err(Error::CaracterNoProcesable);
@@ -82,6 +127,11 @@ pub fn agregar_pasos(
                 }
                 None
             }
+
+            '[' => Some(StepRegex {
+                repeticiones: Repeticion::Exacta(1),
+                caracter_interno: Caracter::Lista(conseguir_lista(chars_iter)),
+            }),
 
             '?' => {
                 if let Some(last) = steps.last_mut() {
@@ -140,7 +190,7 @@ impl Regex {
         let mut steps: Vec<StepRegex> = Vec::new();
         let mut chars_iter = expression.chars();
 
-       /*if !expression.starts_with('^') {
+        /*  if !expression.starts_with('^') {
                     let paso = Some(StepRegex {
             repeticiones: Repeticion::Alguna,
             caracter_interno: Caracter::Wildcard,
@@ -157,8 +207,7 @@ impl Regex {
 
         }
 
-        chars_iter.next();  
-         */ 
+        chars_iter.next();   */
 
         let steps = agregar_pasos(&mut steps, &mut chars_iter)?;
 
@@ -228,13 +277,11 @@ impl Regex {
                 }
                 Repeticion::Rango { min, max } => {
                     let min = match min {
-                        //bien sacada
                         Some(min) => min,
                         None => 0,
                     };
 
                     let max = match max {
-                        //bien sacado
                         Some(max) => max,
                         None => linea.len() - index,
                     };
@@ -271,7 +318,6 @@ impl Regex {
     }
 }
 
-//como funciona backtrack?
 fn backtrack(
     current: StepRegex,
     evaluated: &mut Vec<StepEvaluado>,
@@ -332,86 +378,128 @@ mod tests {
     }
 
     #[test]
-    fn test06_regex_con_question() {
+    fn test07_regex_con_question() {
         let regex = Regex::new("hola?f");
         assert_eq!(regex.unwrap().es_valida("holaf").unwrap(), true);
     }
 
     #[test]
-    fn test06_regex_con_question2() {
+    fn test08_regex_con_question2() {
         let regex = Regex::new("hola?s");
         assert_eq!(regex.unwrap().es_valida("hols").unwrap(), true);
     }
 
     #[test]
-    fn test06_regex_con_question3() {
+    fn test09_regex_con_question3() {
         let regex = Regex::new("hola?");
         assert_eq!(regex.unwrap().es_valida("holaaaaa").unwrap(), false);
     }
 
     #[test]
-    fn test07_regex_con_bracket_exacto() {
+    fn test10_regex_con_bracket_exacto() {
         let regex = Regex::new("a{2}");
         assert_eq!(regex.unwrap().es_valida("a").unwrap(), false);
     }
 
     #[test]
-    fn test08_regex_con_bracket_exacto_() {
+    fn test11_regex_con_bracket_exacto_() {
         let regex = Regex::new("ba{2}");
         assert_eq!(regex.unwrap().es_valida("baa").unwrap(), true);
     }
 
     #[test]
-    fn test09_regex_con_bracket_exacto_() {
+    fn test12_regex_con_bracket_exacto_() {
         let regex = Regex::new("ba{2}c");
         assert_eq!(regex.unwrap().es_valida("bac").unwrap(), false);
     }
 
     #[test]
-    fn test10_regex_con_bracket_con_minimo_() {
+    fn test13_regex_con_bracket_con_minimo_() {
         let regex = Regex::new("ba{2,}c");
         assert_eq!(regex.unwrap().es_valida("baaaac").unwrap(), true);
     }
 
     #[test]
-    fn test11_regex_con_bracket_con_minimo_() {
+    fn test14_regex_con_bracket_con_minimo_() {
         let regex = Regex::new("ba{2,}c");
         assert_eq!(regex.unwrap().es_valida("bac").unwrap(), false);
     }
 
     #[test]
-    fn test12_regex_con_bracket_con_rango_() {
+    fn test15_regex_con_bracket_con_rango_() {
         let regex = Regex::new("ba{5,8}c");
         assert_eq!(regex.unwrap().es_valida("baaaaac").unwrap(), true);
     }
 
     #[test]
-    fn test13_regex_con_bracket_con_rango_() {
+    fn test16_regex_con_bracket_con_rango_() {
         let regex = Regex::new("ba{5,8}c");
         assert_eq!(regex.unwrap().es_valida("baaaac").unwrap(), false);
     }
 
     #[test]
-    fn test14_regex_con_bracket_con_rango_() {
+    fn test17_regex_con_bracket_con_rango_() {
         let regex = Regex::new("ba{5,8}c");
         assert_eq!(regex.unwrap().es_valida("baaaaaaaaac").unwrap(), false);
     }
 
     #[test]
-    fn test14_regex_con_bracket_con_maximo1_() {
+    fn test18_regex_con_bracket_con_maximo1_() {
         let regex = Regex::new("ba{,8}c");
         assert_eq!(regex.unwrap().es_valida("baaaaaac").unwrap(), true);
     }
 
     #[test]
-    fn test14_regex_con_bracket_con_maximo2_() {
+    fn test19_regex_con_bracket_con_maximo2_() {
         let regex = Regex::new("ba{,8}c");
         assert_eq!(regex.unwrap().es_valida("baaaaaaaaaaaaaaaac").unwrap(), false);
     }
-
     #[test]
-    fn test15_regex_combinado() {
+    fn test20_regex_combinado() {
         let regex = Regex::new("ba{5,8}.c");
         assert_eq!(regex.unwrap().es_valida("baaaaaaafc").unwrap(), true);
     }
+
+    #[test]
+    fn test21_regex_bracket_literal_01() {
+        let regex = Regex::new("ho[lmn]a");
+        assert_eq!(regex.unwrap().es_valida("hola").unwrap(), true);
+    }
+
+    #[test]
+    fn test22_regex_bracket_literal_02() {
+        let regex = Regex::new("ho[lmn]a");
+        assert_eq!(regex.unwrap().es_valida("hoka").unwrap(), false);
+    }
+
+    #[test]
+    fn test23_regex_bracket_rango_01() {
+        let regex = Regex::new("ho[i-m]a");
+        assert_eq!(regex.unwrap().es_valida("hola").unwrap(), true);
+    }
+
+    #[test]
+    fn test24_regex_bracket_rango_02() {
+        let regex = Regex::new("ho[i-m]a");
+        assert_eq!(regex.unwrap().es_valida("hosa").unwrap(), false);
+    }
+
+    #[test]
+    fn test25_regex_combinado() {
+        let regex = Regex::new("ho[k-o]a.p{2,4}");
+        assert_eq!(regex.unwrap().es_valida("hola3ppp").unwrap(), true);
+    }
+
+    #[test]
+    fn test26_regex_combinado() {
+        let regex = Regex::new("ho[a-dA-Cx-z]");
+        assert_eq!(regex.unwrap().es_valida("hoAa").unwrap(), true);
+    }
+
+    #[test]
+    fn test27_regex_combinado() {
+        let regex = Regex::new("ho[a-dA-Cx-z]");
+        assert_eq!(regex.unwrap().es_valida("hoXa").unwrap(), false);
+    }
+  
 }
