@@ -14,9 +14,15 @@ impl fmt::Display for Error {
         match *self {
             Error::FallaAbrirArchivo => write!(f, "Error: No se pudo abrir el archivo."),
             Error::FallaLecturaArchivo => write!(f, "Error: No se pudo leer el archivo."),
-            Error::ArgumentosInvalidos => write!(f, "Error: La cantidad de argumentos no es válida."),
-            Error::CaracterNoProcesable => write!(f, "Error: Ingresaste un caracter no posible de procesar."),
-            Error::FormatoDeLineaNoASCII => write!(f, "Error: La linea ingresada no esta en formato ASCII."),
+            Error::ArgumentosInvalidos => {
+                write!(f, "Error: La cantidad de argumentos no es válida.")
+            }
+            Error::CaracterNoProcesable => {
+                write!(f, "Error: Ingresaste un caracter no posible de procesar.")
+            }
+            Error::FormatoDeLineaNoASCII => {
+                write!(f, "Error: La linea ingresada no esta en formato ASCII.")
+            }
         }
     }
 }
