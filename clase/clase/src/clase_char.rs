@@ -8,4 +8,5 @@ pub enum ClaseChar {
     Upper,
     Space,
     Punct,
+    Simple(Vec<char>),
 }

@@ -2,6 +2,7 @@ use std::collections::VecDeque;
 use std::str::Chars;
 
 use crate::caracter::Caracter;
+use crate::clase_char::ClaseChar;
 use crate::errors::Error;
 use crate::repeticion::Repeticion;
 use crate::step_evaluado::StepEvaluado;
@@ -12,54 +13,78 @@ pub struct Regex {
     //anchorings: Anchoring,
 }
 
-
 //[abcd] o [a-d] o [a-dA-Dp-s] => [a,b,c,d] o [a,-,d]
-fn conseguir_lista(chars_iter: &mut Chars<'_>) -> (Vec<char>,bool) {
+fn conseguir_lista(chars_iter: &mut Chars<'_>) -> (ClaseChar,bool) {
     let mut auxiliar: Vec<char> = Vec::new();
     let mut contenido: Vec<char> = Vec::new();
     let mut hay_guion = false;
+    let mut hay_clase = false;
     let mut es_negado = false;
+    let mut cantidad_llaves = 0;
 
     while let Some(c) = chars_iter.next() {
-        if c == ']' {
+        if c == ']' && cantidad_llaves == 1 || c == ']' && !hay_clase{
             break;
-        } else if c == '^' {
+        } else if c == ']' {
+            cantidad_llaves += 1;
+        } else if c == '^' {    
             es_negado = true;
+        } else if c == ':' {
+            continue;
+        } else if c == '[' {
+            hay_clase = true
         } else {
             auxiliar.push(c);
         }
     }
 
-    for i in 0..auxiliar.len() {
-        if auxiliar[i] == '-' {
-            hay_guion = true;
-            let inicio = auxiliar[i - 1];
-            let fin = auxiliar[i + 1];
-            for c in inicio..=fin {
-                contenido.push(c);
+    if !hay_clase {
+        for i in 0..auxiliar.len() {
+            if auxiliar[i] == '-' {
+                hay_guion = true;
+                let inicio = auxiliar[i - 1];
+                let fin = auxiliar[i + 1];
+                for c in inicio..=fin {
+                    contenido.push(c);
+                }
+            }        }
+    
+            if !hay_guion {
+            for i in 0..auxiliar.len() {
+                        contenido.push(auxiliar[i]);
+                }        
             }
-        }        }
+    
+        println!("{:?}, {:?}", contenido, es_negado);
+        return (ClaseChar::Simple(contenido), es_negado);
+        }
 
-        if !hay_guion {
-        for i in 0..auxiliar.len() {
-                    contenido.push(auxiliar[i]);
-            }        
+        let class: String = auxiliar.iter().collect();
+
+        println!("{:?}", class);
+       
+        if class == "alpha" {
+            return (ClaseChar::Alpha, es_negado);
+        } else if class == "alnum" {
+            return (ClaseChar::Alnum, es_negado);
+        } else if class == "digit" {
+            return (ClaseChar::Digit, es_negado);
+        } else if class == "lower" {
+            return (ClaseChar::Lower, es_negado);
+        } else if class == "upper" {
+            return (ClaseChar::Upper, es_negado);
+        } else if class == "space" {
+            return (ClaseChar::Space, es_negado);
+        } else if class == "punct" {
+            return (ClaseChar::Punct, es_negado);
         }
-    /*if !hay_guion {
-        for i in 0..auxiliar.len() {
-            contenido.push(auxiliar[i]);
-        }
-        return contenido;
+
+        return (ClaseChar::Simple(contenido), es_negado);
+       
     }
-    let inicio = auxiliar[0];
-    let fin = auxiliar[auxiliar.len() - 1];
-    for c in inicio..=fin {
-        contenido.push(c);
-    }*/
+        
 
-    println!("{:?}, {:?}", contenido, es_negado);
-    (contenido, es_negado)
-}
+
 
 pub fn agregar_pasos(
     steps: &mut Vec<StepRegex>,
@@ -134,6 +159,7 @@ pub fn agregar_pasos(
             }
 
             '[' => {let contenido = conseguir_lista(chars_iter);
+                println!("CLASE Y BOOLEANO: {:?}", contenido);
                 Some(StepRegex {
                 repeticiones: Repeticion::Exacta(1, contenido.1),
                 caracter_interno: Caracter::Lista(contenido.0),
