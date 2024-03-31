@@ -1,9 +1,9 @@
 use clase::regex::Regex;
 
 fn main() {
-    let regex = Regex::new("ho[abc]a");
+    let regex = Regex::new("ho[abc]+a");
 
-    let value = "hoaa";
+    let value = "hocccca";
 
     match regex.unwrap().es_valida(value) {
         Ok(result) => println!("Result: {}", result),

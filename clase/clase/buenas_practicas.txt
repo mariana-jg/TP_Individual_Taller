@@ -13,3 +13,4 @@ is_ascii_alphabetic(): Devuelve true si el carácter es una letra alfabética AS
 is_ascii_digit(): Devuelve true si el carácter es un dígito ASCII ('0' - '9').
 is_ascii_whitespace(): Devuelve true si el carácter es un espacio en blanco ASCII (espacio, tabulación, retorno de carro, nueva línea, tabulación vertical o avance de página).
 is_ascii_punctuation(): Devuelve true si el carácter es un signo de puntuación ASCII (como '.', ',', ';', etc.).
+

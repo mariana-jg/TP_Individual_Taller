@@ -2,7 +2,7 @@
 
 pub enum Repeticion {
     Exacta(usize, bool),
-    Alguna,
+    Alguna(bool),
     Rango {
         min: Option<usize>,
         max: Option<usize>,

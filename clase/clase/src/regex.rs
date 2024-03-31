@@ -141,6 +141,7 @@ pub fn agregar_pasos(
 
             '?' => {
                 if let Some(last) = steps.last_mut() {
+                    println!("ultimo paso: {:?}", last);
                     last.repeticiones = Repeticion::Rango {
                         min: Some(0),
                         max: Some(1),
@@ -153,7 +154,8 @@ pub fn agregar_pasos(
 
             '*' => {
                 if let Some(last) = steps.last_mut() {
-                    last.repeticiones = Repeticion::Alguna;
+                    let (_, negado) = conseguir_lista(chars_iter);
+                    last.repeticiones = Repeticion::Alguna(negado);
                 } else {
                     return Err(Error::CaracterNoProcesable);
                 }
@@ -237,7 +239,7 @@ impl Regex {
         let mut stack: Vec<StepEvaluado> = Vec::new();
         let mut index = 0;
 
-        'pasos: while let Some(paso) = queue.pop_front() {
+        'pasos: while let Some(mut paso) = queue.pop_front() {
             match paso.repeticiones {
                 Repeticion::Exacta(n, negacion) => {
                     println!("en este caso, estoy negando: {}", negacion);
@@ -274,9 +276,11 @@ impl Regex {
                         return Ok(false);
                     } 
                 }
-                Repeticion::Alguna => {
+                Repeticion::Alguna(negacion) => {
                     let mut sigo_avanzando = true;
                     while sigo_avanzando {
+
+                        println!("paso: {:?}", paso.caracter_interno);
                         let avance = paso.caracter_interno.coincide(&linea[index..]);
 
                         if avance != 0 {
@@ -289,6 +293,9 @@ impl Regex {
                         } else {
                             sigo_avanzando = false;
                         }
+                        if negacion {
+                            return Ok(false);
+                        } 
                     }
                 }
                 Repeticion::Rango { min, max } => {
@@ -305,6 +312,12 @@ impl Regex {
 
                     let mut sigo_avanzando = true;
                     while sigo_avanzando {
+
+                        if matches!(paso.caracter_interno, Caracter::Lista(_)) {
+                            paso.caracter_interno = Caracter::Literal(linea.as_bytes()[index] as char);
+                            println!("nuevo paso: {:?}", paso.caracter_interno)
+                        }
+
                         let avance = paso.caracter_interno.coincide(&linea[index..]);
 
                         if avance != 0 {
@@ -373,6 +386,12 @@ mod tests {
     fn test03_regex_con_asterisk() {
         let regex = Regex::new("ab*c");
         assert_eq!(regex.unwrap().es_valida("abbbbbbc").unwrap(), true);
+    }
+
+    #[test]
+    fn test03_regex_con_asterisk02() {
+        let regex = Regex::new("ab*c");
+        assert_eq!(regex.unwrap().es_valida("ac").unwrap(), true);
     }
 
     #[test]
@@ -507,21 +526,106 @@ mod tests {
     }
 
     #[test]
-    fn test26_regex_combinado() {
+    fn test26_regex_bracket_rango_03() {
         let regex = Regex::new("ho[a-dA-Cx-z]");
         assert_eq!(regex.unwrap().es_valida("hoAa").unwrap(), true);
     }
 
     #[test]
-    fn test27_regex_combinado() {
+    fn test27_regex_bracket_rango_04() {
         let regex = Regex::new("ho[a-dA-Cx-z]");
         assert_eq!(regex.unwrap().es_valida("hoXa").unwrap(), false);
     }
 
     #[test]
-    fn test28_regex_combinado() {
+    fn test28_regex_bracket_rango_05_negado() {
         let regex = Regex::new("ho[^a-dA-Cx-z]");
         assert_eq!(regex.unwrap().es_valida("hoXa").unwrap(), true);
     }
+
+    #[test]
+    fn test29_regex_bracket_rango_06_negado() {
+        let regex = Regex::new("ho[^a-dA-Cx-z]");
+        assert_eq!(regex.unwrap().es_valida("hoxa").unwrap(), false);
+    }
+
+    #[test]
+    fn test30_regex_combinado_bracket_question01() {
+        let regex = Regex::new("ho[a-dA-Cx-z]?a");
+        assert_eq!(regex.unwrap().es_valida("hoddda").unwrap(), false);
+    }
+
+    #[test]
+    fn test31_regex_combinado_bracket_question02() {
+        let regex = Regex::new("ho[a-dA-Cx-z]?a");
+        assert_eq!(regex.unwrap().es_valida("hoa").unwrap(), true);
+    }
+
+    #[test]
+    fn test32_regex_combinado_bracket_question03() {
+        let regex = Regex::new("ho[a-dA-Cx-z]?a");
+        assert_eq!(regex.unwrap().es_valida("hoda").unwrap(), true);
+    }
+
+    #[test]
+    fn test33_regex_combinado_bracket_plus01() {
+        let regex = Regex::new("ho[a-dA-Cx-z]+a");
+        assert_eq!(regex.unwrap().es_valida("hoE").unwrap(), false);
+    }
+
+    #[test]
+    fn test34_regex_combinado_bracket_plus02() {
+        let regex = Regex::new("ho[a-dA-Cx-z]+a");
+        assert_eq!(regex.unwrap().es_valida("hoaE").unwrap(), true);
+    }
+
+    #[test]
+    fn test35_regex_combinado_bracket_plus03() {
+        let regex = Regex::new("ho[a-dA-Cx-z]+a");
+        assert_eq!(regex.unwrap().es_valida("hoaaaaaaaaaaaaaaaaaE").unwrap(), true);
+    }
+
+    #[test]
+    fn test36_regex_combinado_bracket_rango01() {
+        let regex = Regex::new("ho[a-dA-Cx-z]{2,4}a");
+        assert_eq!(regex.unwrap().es_valida("hoaE").unwrap(), false);
+    }
+
+    #[test]
+    fn test37_regex_combinado_bracket_rango02() {
+        let regex = Regex::new("ho[a-dA-Cx-z]{2,4}a");
+        assert_eq!(regex.unwrap().es_valida("hoaaaE").unwrap(), true);
+    }
+
+    #[test]
+    fn test38_regex_combinado_bracket_rango03() {
+        let regex = Regex::new("ho[a-dA-Cx-z]{2,4}a");
+        assert_eq!(regex.unwrap().es_valida("hoaaaaaaE").unwrap(), false);
+    }
   
+    
+    #[test]
+    fn test39_regex_combinado_bracket_asterisk01() {
+        let regex = Regex::new("ho[a-dA-Cx-z]*a");
+        assert_eq!(regex.unwrap().es_valida("hoa").unwrap(), true);
+    }
+
+    #[test]
+    fn test40_regex_combinado_bracket_asterisk02() {
+        let regex = Regex::new("ho[a-dA-Cx-z]*a");
+        assert_eq!(regex.unwrap().es_valida("hoAAAa").unwrap(), true);
+    }
+
+    #[test]
+    fn test41_regex_combinado_bracket_negado_asterisk01() {
+        let regex = Regex::new("ho[^a-dA-Cx-z]*a");
+        assert_eq!(regex.unwrap().es_valida("hoKa").unwrap(), true);
+    }
+
+    #[test]
+    fn test42_regex_combinado_bracket_negado_asterisk02() {
+        let regex = Regex::new("ho[^a-dA-Cx-z]*a");
+        assert_eq!(regex.unwrap().es_valida("hoa").unwrap(), true);
+    }
+
 }
