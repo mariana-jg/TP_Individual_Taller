@@ -1,11 +1,14 @@
-use std::{fs::File, io::{BufRead, BufReader, Lines}};
+use std::{
+    fs::File,
+    io::{BufRead, BufReader, Lines},
+};
 
 use errors::Error;
 
 use crate::errors;
 
-pub fn puedo_procesar_archivo(args: &str) -> Result<Vec<String>, Error>  {
-    let archivo = File::open(args.to_string()) ;
+pub fn puedo_procesar_archivo(args: &str) -> Result<Vec<String>, Error> {
+    let archivo = File::open(args.to_string());
     match archivo {
         Ok(archivo) => {
             let mut lineas: Vec<String> = vec![];
@@ -13,13 +16,13 @@ pub fn puedo_procesar_archivo(args: &str) -> Result<Vec<String>, Error>  {
             for linea in reader {
                 match linea {
                     Ok(linea) => lineas.push(linea),
-                    Err(_err) => return Err(Error::FallaLecturaArchivo)
+                    Err(_err) => return Err(Error::FallaLecturaArchivo),
                 };
             }
-    
+
             return Ok(lineas);
         }
-        Err(_err) => return Err(Error::FallaAbrirArchivo)
+        Err(_err) => return Err(Error::FallaAbrirArchivo),
     };
 }
 
@@ -28,14 +31,12 @@ fn cantidad_correcta_argumentos(cantidad_argumentos: usize) -> bool {
 }
 
 pub fn verificar_inicio(args: Vec<String>) -> Result<Vec<String>, Error> {
-
     if !cantidad_correcta_argumentos(args.len()) {
         return Err(Error::ArgumentosInvalidos);
     }
 
-    match puedo_procesar_archivo(&args[args.len()-1]) {
+    match puedo_procesar_archivo(&args[args.len() - 1]) {
         Ok(lineas) => return Ok(lineas),
         Err(error) => return Err(error),
     }
-
 }

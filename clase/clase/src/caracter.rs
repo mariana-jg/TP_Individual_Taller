@@ -10,8 +10,7 @@ pub enum Caracter {
     Dollar,
 }
 
-fn calcular_longitud_utf8<F>(value: &str, funcion: F) -> usize where F: Fn(char) -> bool,
-{
+fn calcular_longitud_utf8 <F> (value: &str, funcion: F) -> usize where F: Fn(char) -> bool, {
     if let Some(c) = value.chars().next() {
         if funcion(c) {
             c.len_utf8()
@@ -25,7 +24,6 @@ fn calcular_longitud_utf8<F>(value: &str, funcion: F) -> usize where F: Fn(char)
 
 impl Caracter {
     pub fn coincide(&self, value: &str) -> usize {
-        //println!("Caracter::coincide({:?}, {:?})", self, value);
         match self {
             Caracter::Literal(l) => {
                 if value.chars().next() == Some(*l) {
@@ -42,49 +40,28 @@ impl Caracter {
                 }
             }
             Caracter::Lista(clase) => {
-               // println!("en lista");
                 match clase {
                     ClaseChar::Alpha => {
-                        println!("en alpha");
-                        if let Some(c) = value.chars().next() {
-                            if c.is_alphabetic() {
-                                c.len_utf8()
-                            } else {
-                                0
-                            }
-                        } else {
-                            0
-                        }
+                        calcular_longitud_utf8(value, char::is_alphabetic)
                     }
                     ClaseChar::Alnum => {
-                        //println!("en alnum");
                         calcular_longitud_utf8(value, char::is_alphanumeric)
                     }
                     ClaseChar::Digit => {
-                       // println!("en digit");
-                        if let Some(c) = value.chars().next() {
-                            if c.is_digit(10) {
-                                c.len_utf8()
-                            } else {
-                                0
-                            }
-                        } else {
-                            0
-                        }
+                        calcular_longitud_utf8(value, |c| c.is_digit(10))
                     }
                     ClaseChar::Lower => {
-                        //println!("en alpha");
                         calcular_longitud_utf8(value, char::is_lowercase)
                     }
                     ClaseChar::Upper => {
-                     //   println!("en alpha");
                         calcular_longitud_utf8(value, char::is_uppercase)
                     }
                     ClaseChar::Space => {
-                        //println!("en alpha");
                         calcular_longitud_utf8(value, char::is_whitespace)
                     }
                     ClaseChar::Punct => {
+                        calcular_longitud_utf8(value, |arg0: char| char::is_ascii_punctuation(&arg0))
+                        /* 
                         if let Some(c) = value.chars().next() {
                             if c.is_ascii_punctuation() {
                                 c.len_utf8()
@@ -93,7 +70,7 @@ impl Caracter {
                             }
                         } else {
                             0
-                        }
+                        }*/
                     }
                     ClaseChar::Simple(list) => {
                         if let Some(c) = value.chars().next() {
