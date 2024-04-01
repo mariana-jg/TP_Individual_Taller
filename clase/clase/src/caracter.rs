@@ -3,17 +3,13 @@ use crate::clase_char::ClaseChar;
 #[derive(Clone, Debug)]
 
 pub enum Caracter {
-    Literal(char), //es un caracter "normal"
-    Wildcard,      //coincide con cualquier caracter
-    // Clase(ClaseChar), //literales, rangos y clases de caracteres
+    Literal(char), 
+    Wildcard,  
     Lista(ClaseChar),
-    //2 tipos de literales: los que son caracteres literales y los que son rangos
     Dollar,
 }
 
-fn calcular_longitud_utf8<F>(value: &str, funcion: F) -> usize
-where
-    F: Fn(char) -> bool,
+fn calcular_longitud_utf8<F>(value: &str, funcion: F) -> usize where F: Fn(char) -> bool,
 {
     if let Some(c) = value.chars().next() {
         if funcion(c) {

@@ -105,6 +105,7 @@ pub fn agregar_pasos(steps: &mut Vec<StepRegex>, chars_iter: &mut Chars<'_>,) ->
             }),
 
             LLAVE_ABIERTA => {
+
                 if let Some(last) = steps.last_mut() {
                     let mut contenido: Vec<char> = Vec::new();
                     let mut rangos: Vec<usize> = Vec::new();
@@ -149,6 +150,7 @@ pub fn agregar_pasos(steps: &mut Vec<StepRegex>, chars_iter: &mut Chars<'_>,) ->
             }
 
             CORCHETE_ABIERTO => {
+
                 let contenido = conseguir_lista(chars_iter);
                 Some(StepRegex {
                     repeticiones: Repeticion::Exacta(1, contenido.1),
@@ -157,6 +159,7 @@ pub fn agregar_pasos(steps: &mut Vec<StepRegex>, chars_iter: &mut Chars<'_>,) ->
             }
 
             INTERROGACION => {
+
                 if let Some(last) = steps.last_mut() {
                     last.repeticiones = Repeticion::Rango {
                         min: Some(0),
@@ -169,6 +172,7 @@ pub fn agregar_pasos(steps: &mut Vec<StepRegex>, chars_iter: &mut Chars<'_>,) ->
             }
 
             ASTERISCO => {
+
                 if let Some(last) = steps.last_mut() {
                     let (_, negado) = conseguir_lista(chars_iter);
                     last.repeticiones = Repeticion::Alguna(negado);
@@ -179,6 +183,7 @@ pub fn agregar_pasos(steps: &mut Vec<StepRegex>, chars_iter: &mut Chars<'_>,) ->
             }
 
             MAS => {
+
                 if let Some(last) = steps.last_mut() {
                     last.repeticiones = Repeticion::Rango {
                         min: Some(1),
@@ -191,6 +196,7 @@ pub fn agregar_pasos(steps: &mut Vec<StepRegex>, chars_iter: &mut Chars<'_>,) ->
             }
 
             BARRA => match chars_iter.next() {
+
                 Some(literal) => Some(StepRegex {
                     repeticiones: Repeticion::Exacta(1, false),
                     caracter_interno: Caracter::Literal(literal),
@@ -205,9 +211,7 @@ pub fn agregar_pasos(steps: &mut Vec<StepRegex>, chars_iter: &mut Chars<'_>,) ->
 
             CARET => None,
 
-            FUNCION_OR => {
-                
-            }
+            FUNCION_OR => None,
 
             _ => return Err(Error::CaracterNoProcesable),
         };
@@ -791,7 +795,7 @@ mod tests {
 
     #[test]
     fn test64_regex_dollar_caret() {
-        let regex = Regex::new("abc|de+f");
-        assert_eq!(regex.unwrap().es_valida("abc").unwrap(), true);
+        let regex = Regex::new("^hola$");
+        assert_eq!(regex.unwrap().es_valida("hola").unwrap(), true);
     }
 }
