@@ -163,19 +163,24 @@ pub fn agregar_pasos(steps: &mut Vec<StepRegex>, chars_iter: &mut Chars<'_>,) ->
                         repeticiones: Repeticion::Exacta(1, contenido.1),
                         caracter_interno: Caracter::Lista(contenido.0),
                     }),
-                    Err(_) => return Err(Error::CaracterNoProcesable)
+                    Err(error) => return Err(error)
                 }
             }
 
             INTERROGACION => {
 
-                if let Some(last) = steps.last_mut() {
-                    last.repeticiones = Repeticion::Rango {
-                        min: Some(0),
-                        max: Some(1),
-                    }
-                } else {
-                    return Err(Error::CaracterNoProcesable);
+                match steps.last_mut() {
+                    Some(last) => {
+                        if last.caracter_interno == Caracter::Wildcard && last.repeticiones == Repeticion::Alguna(false) {
+                            return Err(Error::CaracterNoProcesable);
+                        } else {
+                            last.repeticiones = Repeticion::Rango {
+                                min: Some(0),
+                                max: Some(1),
+                            };
+                        }
+                    },
+                    None => {},
                 }
                 None
             }
@@ -186,7 +191,7 @@ pub fn agregar_pasos(steps: &mut Vec<StepRegex>, chars_iter: &mut Chars<'_>,) ->
                     match conseguir_lista(chars_iter) {
                         Ok((_, negado)) => last.repeticiones = Repeticion::Alguna(negado),
                         Err(error) => return Err(error),
-                    }
+                    };
                 } else {
                     return Err(Error::CaracterNoProcesable);
                 }
@@ -411,6 +416,72 @@ fn backtrack(current: StepRegex, evaluated: &mut Vec<StepEvaluado>, next: &mut V
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test01_literales() {
+        let regex = Regex::new("abcd");
+        assert_eq!(regex.unwrap().es_valida("abcdefg").unwrap(), true);
+    }
+
+    #[test]
+    fn test02_literales() {
+        let regex = Regex::new("abcd");
+        assert_eq!(regex.unwrap().es_valida("efgabcd").unwrap(), true);
+    }
+
+    #[test]
+    fn test03_literales() {
+        let regex = Regex::new("abcd");
+        assert_eq!(regex.unwrap().es_valida("abcefg").unwrap(), false);
+    }
+
+    #[test]
+    fn test04_punto() {
+        let regex = Regex::new("ab.cd");
+        assert_eq!(regex.unwrap().es_valida("ab0cd").unwrap(), true);
+    }
+
+    #[test]
+    fn test05_punto() {
+        let regex = Regex::new("ab.cd");
+        assert_eq!(regex.unwrap().es_valida("abcd").unwrap(), false);
+    }
+
+    #[test]
+    fn test06_punto_asterisco() {
+        let regex = Regex::new("ab.*cd");
+        assert_eq!(regex.unwrap().es_valida("abcd").unwrap(), true);
+    }
+    
+    #[test]
+    fn test07_punto_asterisco() {
+        let regex = Regex::new("ab.*cd");
+        assert_eq!(regex.unwrap().es_valida("abaaaaaacd").unwrap(), true);
+    }
+
+    #[test]
+    fn test08_corchete() {
+        let regex = Regex::new("a[bc]d");
+        assert_eq!(regex.unwrap().es_valida("abd").unwrap(), true);
+    }
+
+    #[test]
+    fn test09_corchete() {
+        let regex = Regex::new("a[bc]d");
+        assert_eq!(regex.unwrap().es_valida("acd").unwrap(), true);
+    }
+
+    #[test]
+    fn test10_corchete() {
+        let regex = Regex::new("a[bc]d");
+        assert_eq!(regex.unwrap().es_valida("afd").unwrap(), false);
+    }
+
+    #[test]
+    fn test11_corchete_invalido() {
+        let regex = Regex::new("a[b|c]d");
+        assert_eq!(regex.unwrap().es_valida("afd").unwrap_err(), Error::CaracterNoProcesable);
+    }
 
     #[test]
     fn test01_regex_con_literales() {

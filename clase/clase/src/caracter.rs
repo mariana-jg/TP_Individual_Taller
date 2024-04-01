@@ -1,6 +1,7 @@
 use crate::clase_char::ClaseChar;
 
 #[derive(Clone, Debug)]
+#[derive(PartialEq)]
 
 pub enum Caracter {
     Literal(char), 

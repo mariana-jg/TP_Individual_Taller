@@ -1,4 +1,5 @@
 #[derive(Clone, Debug)]
+#[derive(PartialEq)]
 
 pub enum Repeticion {
     Exacta(usize, bool),

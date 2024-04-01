@@ -11,20 +11,19 @@ fn main() {
     match lineas {
         Ok(lineas) => {
 
-            for l in lineas{  
+            for l in lineas {  
                 match Regex::es_valida_general(&args[1],l.as_str()) {
                     Ok(result) => {
                         if result {
                             println!("{}", l);
                         }
                     },
-                    Err(err) => println!("Error: {}", err),
+                    Err(err) => {println!("{}", err);
+                                        break;}
                 }
             }
         },
         Err(error) =>  println!("{}", error),
 
     };      
-
-    println!("Hello, world!");
 }
