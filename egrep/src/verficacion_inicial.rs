@@ -1,7 +1,6 @@
 use std::{fs::File, io::{BufRead, BufReader, Lines}};
 
-extern crate errores;
-use errores::Error;
+use errors::Error;
 
 pub fn puedo_procesar_archivo(args: &str) -> Result<Vec<String>, Error>  {
     let archivo = File::open(args.to_string()) ;

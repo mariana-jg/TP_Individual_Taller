@@ -45,7 +45,7 @@ fn obtener_auxiliar (chars_iter: &mut Chars<'_>) -> (Vec<char>, bool, bool) {
     (auxiliar, hay_clase, es_negado)
 }
 
-fn determinar_contenido_a_evaluar(auxiliar: Vec<char>) -> Vec<char> {
+fn determinar_contenido_a_evaluar(auxiliar: Vec<char>) -> Result<Vec<char>, Error> {
     let mut contenido: Vec<char> = Vec::new();
 
     for i in 0..auxiliar.len() {
@@ -53,14 +53,17 @@ fn determinar_contenido_a_evaluar(auxiliar: Vec<char>) -> Vec<char> {
             if let (Some(inicio), Some(fin)) = (auxiliar.get(i - 1), auxiliar.get(i + 1)) {
                 contenido.extend(*inicio..=*fin);
             }
-        } else {
+        } else if auxiliar[i] == '|' {
+            return Err(Error::CaracterNoProcesable);
+        }
+         else {
             contenido.push(auxiliar[i]);
         }
     }
-    contenido
+    Ok(contenido)
 }
 
-fn conseguir_lista(chars_iter: &mut Chars<'_>) -> (ClaseChar, bool) {
+fn conseguir_lista(chars_iter: &mut Chars<'_>) -> Result<(ClaseChar, bool), Error> {
 
     let (auxiliar, hay_clase, es_negado) = obtener_auxiliar(chars_iter);
 
@@ -68,20 +71,24 @@ fn conseguir_lista(chars_iter: &mut Chars<'_>) -> (ClaseChar, bool) {
         let class: String = auxiliar.iter().collect();
 
         match class.to_string().as_str() {
-            "alpha" => return (ClaseChar::Alpha, es_negado),
-            "alnum" => return (ClaseChar::Alnum, es_negado),
-            "digit" => return (ClaseChar::Digit, es_negado),
-            "lower" => return (ClaseChar::Lower, es_negado),
-            "upper" => return (ClaseChar::Upper, es_negado),
-            "space" => return (ClaseChar::Space, es_negado),
-            "punct" => return (ClaseChar::Punct, es_negado),
+            "alpha" => return Ok((ClaseChar::Alpha, es_negado)),
+            "alnum" => return Ok((ClaseChar::Alnum, es_negado)),
+            "digit" => return Ok((ClaseChar::Digit, es_negado)),
+            "lower" => return Ok((ClaseChar::Lower, es_negado)),
+            "upper" => return Ok((ClaseChar::Upper, es_negado)),
+            "space" => return Ok((ClaseChar::Space, es_negado)),
+            "punct" => return Ok((ClaseChar::Punct, es_negado)),
             _ => {}
         }
     }
 
     let contenido = determinar_contenido_a_evaluar(auxiliar);
 
-    (ClaseChar::Simple(contenido), es_negado)
+    match contenido {
+        Ok(content) => Ok((ClaseChar::Simple(content), es_negado)),
+        Err(error) => Err(error),
+    }
+
 }
 
 pub fn agregar_pasos(steps: &mut Vec<StepRegex>, chars_iter: &mut Chars<'_>,) -> Result<Vec<StepRegex>, Error> {
@@ -151,11 +158,13 @@ pub fn agregar_pasos(steps: &mut Vec<StepRegex>, chars_iter: &mut Chars<'_>,) ->
 
             CORCHETE_ABIERTO => {
 
-                let contenido = conseguir_lista(chars_iter);
-                Some(StepRegex {
-                    repeticiones: Repeticion::Exacta(1, contenido.1),
-                    caracter_interno: Caracter::Lista(contenido.0),
-                })
+                match conseguir_lista(chars_iter) {
+                    Ok(contenido) => Some(StepRegex {
+                        repeticiones: Repeticion::Exacta(1, contenido.1),
+                        caracter_interno: Caracter::Lista(contenido.0),
+                    }),
+                    Err(_) => return Err(Error::CaracterNoProcesable)
+                }
             }
 
             INTERROGACION => {
@@ -174,8 +183,10 @@ pub fn agregar_pasos(steps: &mut Vec<StepRegex>, chars_iter: &mut Chars<'_>,) ->
             ASTERISCO => {
 
                 if let Some(last) = steps.last_mut() {
-                    let (_, negado) = conseguir_lista(chars_iter);
-                    last.repeticiones = Repeticion::Alguna(negado);
+                    match conseguir_lista(chars_iter) {
+                        Ok((_, negado)) => last.repeticiones = Repeticion::Alguna(negado),
+                        Err(error) => return Err(error),
+                    }
                 } else {
                     return Err(Error::CaracterNoProcesable);
                 }
@@ -238,6 +249,24 @@ fn definir_uso_de_caret(expression: &str, steps: &mut Vec<StepRegex>) {
 }
 
 impl Regex {
+
+    pub fn es_valida_general(expression: &str,  linea: &str) -> Result<bool, Error> {
+        let expresiones_a_evaluar: Vec<&str> = expression.split('|').collect();
+        let mut coincidencia = false;
+
+        for exp in expresiones_a_evaluar {
+            let regex = match Regex::new(exp){
+                Ok(regex) => regex,
+                Err(err) => return Err(err),
+            };
+            if regex.es_valida(linea)? {
+                coincidencia = true;
+                break;
+            }
+           
+        }
+        Ok(coincidencia)
+    }
 
     pub fn new(expression: &str) -> Result<Self, Error> {
 
@@ -798,4 +827,21 @@ mod tests {
         let regex = Regex::new("^hola$");
         assert_eq!(regex.unwrap().es_valida("hola").unwrap(), true);
     }
+
+    #[test]
+    fn test64_regex_dollar_caretghdg() {
+        let regex = Regex::new(".*.{3}");
+        assert_eq!(regex.unwrap().es_valida("fasfass aaaaaaaaaaaaaaaaaaabbb").unwrap(), true);
+    }
+
+    #[test]
+    fn test65_regex_con_or() {
+        assert_eq!(Regex::es_valida_general("[abc]d[[:alpha:]]|k","hola").unwrap(), false);
+    }
+
+    #[test]
+    fn test65_regex_con_or2() {
+        assert_eq!(Regex::es_valida_general("[abc]d[[:alpha:]]|k","adAk").unwrap(), true);
+    }
+
 }
