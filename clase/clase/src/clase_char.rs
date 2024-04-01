@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 #[derive(Clone, Debug, PartialEq)]
 
 pub enum ClaseChar {
@@ -8,5 +10,5 @@ pub enum ClaseChar {
     Upper,
     Space,
     Punct,
-    Simple(Vec<char>),
+    Simple(HashSet<char>),
 }

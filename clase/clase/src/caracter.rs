@@ -5,7 +5,7 @@ use crate::clase_char::ClaseChar;
 
 pub enum Caracter {
     Literal(char), 
-    Wildcard,  
+    Comodin,  
     Lista(ClaseChar),
     Dollar,
 }
@@ -24,6 +24,7 @@ fn calcular_longitud_utf8 <F> (value: &str, funcion: F) -> usize where F: Fn(cha
 
 impl Caracter {
     pub fn coincide(&self, value: &str) -> usize {
+        println!("coincide: {:?} con {}", &self, value);
         match self {
             Caracter::Literal(l) => {
                 if value.chars().next() == Some(*l) {
@@ -32,7 +33,7 @@ impl Caracter {
                     0
                 }
             }
-            Caracter::Wildcard => {
+            Caracter::Comodin => {
                 if let Some(c) = value.chars().next() {
                     c.len_utf8()
                 } else {
@@ -42,39 +43,26 @@ impl Caracter {
             Caracter::Lista(clase) => {
                 match clase {
                     ClaseChar::Alpha => {
-                        calcular_longitud_utf8(value, char::is_alphabetic)
-                    }
+                        calcular_longitud_utf8(value, |arg0: char| char::is_ascii_alphabetic(&arg0))}
                     ClaseChar::Alnum => {
-                        calcular_longitud_utf8(value, char::is_alphanumeric)
-                    }
+                        calcular_longitud_utf8(value, char::is_alphanumeric)}
                     ClaseChar::Digit => {
-                        calcular_longitud_utf8(value, |c| c.is_digit(10))
-                    }
+                        calcular_longitud_utf8(value, |c| c.is_digit(10))}
                     ClaseChar::Lower => {
-                        calcular_longitud_utf8(value, char::is_lowercase)
-                    }
+                        calcular_longitud_utf8(value, char::is_lowercase)}
                     ClaseChar::Upper => {
-                        calcular_longitud_utf8(value, char::is_uppercase)
-                    }
+                        calcular_longitud_utf8(value, char::is_uppercase)}
                     ClaseChar::Space => {
-                        calcular_longitud_utf8(value, char::is_whitespace)
-                    }
+                        calcular_longitud_utf8(value, char::is_whitespace)}
                     ClaseChar::Punct => {
-                        calcular_longitud_utf8(value, |arg0: char| char::is_ascii_punctuation(&arg0))
-                        /* 
-                        if let Some(c) = value.chars().next() {
-                            if c.is_ascii_punctuation() {
-                                c.len_utf8()
-                            } else {
-                                0
-                            }
-                        } else {
-                            0
-                        }*/
-                    }
+                        calcular_longitud_utf8(value, |arg0: char| char::is_ascii_punctuation(&arg0))}
                     ClaseChar::Simple(list) => {
+                        println!("estas en la lista simple");
                         if let Some(c) = value.chars().next() {
+                            println!("caracter: {}", c);
                             if list.contains(&c) {
+                                println!("la lista lo contiene");
+
                                 c.len_utf8()
                             } else {
                                 0

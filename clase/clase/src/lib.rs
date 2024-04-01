@@ -6,9 +6,9 @@ pub mod repeticion;
 
 pub mod clase_char;
 
-pub mod step_regex;
+pub mod paso_regex;
 
-pub mod step_evaluado;
+pub mod paso_evaluado;
 
 pub mod errors;
 
