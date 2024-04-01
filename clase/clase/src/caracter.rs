@@ -8,6 +8,7 @@ pub enum Caracter {
     // Clase(ClaseChar), //literales, rangos y clases de caracteres
     Lista(ClaseChar),
     //2 tipos de literales: los que son caracteres literales y los que son rangos
+    Dollar,
 }
 
 fn calcular_longitud_utf8<F>(value: &str, funcion: F) -> usize
@@ -76,8 +77,7 @@ impl Caracter {
                     }
                     ClaseChar::Lower => {
                         println!("en alpha");
-                        calcular_longitud_utf8(value, char::is_lowercase)    
-                        
+                        calcular_longitud_utf8(value, char::is_lowercase)
                     }
                     ClaseChar::Upper => {
                         println!("en alpha");
@@ -109,6 +109,13 @@ impl Caracter {
                             0
                         }
                     }
+                }
+            }
+            Caracter::Dollar => {
+                if let Some(_) = value.chars().next() {
+                    0
+                } else {
+                    1
                 }
             }
         }
