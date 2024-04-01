@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":["caracter","clase_char","errors","regex","repeticion","step_evaluado","step_regex","verficacion_inicial"]};

@@ -22,7 +22,7 @@ const CARET: char = '^';
 const INDICADOR_CLASE: char = ':';
 const SEPARADOR_RANGO: char = '-';
 const FUNCION_OR: char = '|';
-
+///este struct representa una expresion regular
 pub struct Regex {
     pasos: Vec<StepRegex>,
 }
@@ -83,6 +83,8 @@ fn conseguir_lista(chars_iter: &mut Chars<'_>) -> Result<(ClaseChar, bool), Erro
     }
 
     let contenido = determinar_contenido_a_evaluar(auxiliar);
+
+    println!("{:?}", contenido);
 
     match contenido {
         Ok(content) => Ok((ClaseChar::Simple(content), es_negado)),
@@ -187,28 +189,39 @@ pub fn agregar_pasos(steps: &mut Vec<StepRegex>, chars_iter: &mut Chars<'_>,) ->
 
             ASTERISCO => {
 
-                if let Some(last) = steps.last_mut() {
-                    match conseguir_lista(chars_iter) {
-                        Ok((_, negado)) => last.repeticiones = Repeticion::Alguna(negado),
-                        Err(error) => return Err(error),
-                    };
-                } else {
-                    return Err(Error::CaracterNoProcesable);
+                match steps.last_mut() {
+                    Some(last) => {
+                        if last.caracter_interno == Caracter::Wildcard && last.repeticiones == Repeticion::Alguna(false) {
+                            return Err(Error::CaracterNoProcesable);
+                        } else {
+                            match conseguir_lista(chars_iter) {
+                                Ok((_, negado)) => last.repeticiones = Repeticion::Alguna(negado),
+                                Err(error) => return Err(error),
+                            };
+                        }
+                    },
+                    None => {},
                 }
                 None
             }
 
             MAS => {
 
-                if let Some(last) = steps.last_mut() {
-                    last.repeticiones = Repeticion::Rango {
-                        min: Some(1),
-                        max: None,
-                    };
-                } else {
-                    return Err(Error::CaracterNoProcesable);
+                match steps.last_mut() {
+                    Some(last) => {
+                        if last.caracter_interno == Caracter::Wildcard && last.repeticiones == Repeticion::Alguna(false) {
+                            return Err(Error::CaracterNoProcesable);
+                        } else {
+                            last.repeticiones = Repeticion::Rango {
+                                min: Some(1),
+                                max: None,
+                            };
+                        }
+                    },
+                    None => {},
                 }
                 None
+
             }
 
             BARRA => match chars_iter.next() {
@@ -916,3 +929,84 @@ mod tests {
     }
 
 }
+/*
+abcd
+abxcd
+abxxcd
+abcde
+ab.cd
+abxxxxcd
+ab123cd
+ab.*cd
+ab{2,4}cd
+abbbbbcd
+abcdeeeef
+a[bc]d
+ad
+abcdabcd
+abbc
+abbcd
+abbbcd
+ab{3}cd
+ab{4}cd
+ab{5}cd
+ab{2,4}cd
+ab{3,}cd
+abcdeee
+abcdeeeee
+abcdeeeeee
+abcdeeeeeee
+abc|de+f
+abcf
+abcfde
+abcdeeeeef
+abcdeeeeeef
+abcde
+la a es una vocal
+la e es una vocal
+la i es una vocal
+la o es una vocal
+la u es una vocal
+la b no es una vocal
+la c no es una vocal
+la d no es una vocal
+la f no es una vocal
+la g no es una vocal
+la [aeiou] es una vocal
+la [^aeiou] no es una vocal
+la hola es una vocal
+hola 123 mundo
+hola mundo
+hola hola mundo
+hola la mundo
+hola a mundo
+hola    mundo
+hola  mundo
+hola       mundo
+hola m u n d o
+hola[[:space:]]mundo
+HascalYase
+ascalaYase
+ascalAase
+aascalAase
+abascalYase
+abascalYase
+abascalase
+es el fin$
+es el fin
+es el fin !
+es el fin123 */
+
+/*ab.cd
+ab.*cd
+a[bc]d
+ab{2,4}cd
+abc|de+f
+la [aeiou] es una vocal
+la [^aeiou] no es una vocal
+hola [[:alpha:]]+
+[[:digit:]] es un numero
+el caracter [[:alnum:]] no es un simbolo
+hola[[:space:]]mundo
+[[:upper:]]ascal[[:upper:]]ase
+es el fin$ */
