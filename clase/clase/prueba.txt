@@ -1,0 +1,66 @@
+jaja abcd
+abxcd
+abxxcd
+abcde
+ab.cd
+abxxxxcd
+ab123cd
+ab.*cd
+ab{2,4}cd
+abbbbbcd
+abcdeeeef
+a[bc]d
+ad
+abcdabcd
+abbc
+abbcd
+abbbcd
+ab{3}cd
+ab{4}cd
+ab{5}cd
+ab{2,4}cd
+ab{3,}cd
+abcdeee
+abcdeeeee
+abcdeeeeee
+abcdeeeeeee
+abc|de+f
+abcf
+abcfde
+abcdeeeeef
+abcdeeeeeef
+abcde
+la a es una vocal
+la e es una vocal
+la i es una vocal
+la o es una vocal
+la u es una vocal
+la b no es una vocal
+la c no es una vocal
+la d no es una vocal
+la f no es una vocal
+la g no es una vocal
+la [aeiou] es una vocal
+la [^aeiou] no es una vocal
+la hola es una vocal
+hola 123 mundo
+hola mundo
+hola hola mundo
+hola la mundo
+hola a mundo
+hola    mundo
+hola  mundo
+hola       mundo
+hola m u n d o
+hola[[:space:]]mundo
+HascalYase
+ascalaYase
+ascalAase
+aascalAase
+abascalYase
+abascalYase
+abascalase
+es el fin$
+es el fin
+es el fin !
+es el fin123

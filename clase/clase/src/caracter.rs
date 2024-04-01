@@ -24,7 +24,7 @@ fn calcular_longitud_utf8<F>(value: &str, funcion: F) -> usize where F: Fn(char)
 
 impl Caracter {
     pub fn coincide(&self, value: &str) -> usize {
-        println!("Caracter::coincide({:?}, {:?})", self, value);
+        //println!("Caracter::coincide({:?}, {:?})", self, value);
         match self {
             Caracter::Literal(l) => {
                 if value.chars().next() == Some(*l) {
@@ -41,7 +41,7 @@ impl Caracter {
                 }
             }
             Caracter::Lista(clase) => {
-                println!("en lista");
+               // println!("en lista");
                 match clase {
                     ClaseChar::Alpha => {
                         println!("en alpha");
@@ -56,11 +56,11 @@ impl Caracter {
                         }
                     }
                     ClaseChar::Alnum => {
-                        println!("en alnum");
+                        //println!("en alnum");
                         calcular_longitud_utf8(value, char::is_alphanumeric)
                     }
                     ClaseChar::Digit => {
-                        println!("en digit");
+                       // println!("en digit");
                         if let Some(c) = value.chars().next() {
                             if c.is_digit(10) {
                                 c.len_utf8()
@@ -72,15 +72,15 @@ impl Caracter {
                         }
                     }
                     ClaseChar::Lower => {
-                        println!("en alpha");
+                        //println!("en alpha");
                         calcular_longitud_utf8(value, char::is_lowercase)
                     }
                     ClaseChar::Upper => {
-                        println!("en alpha");
+                     //   println!("en alpha");
                         calcular_longitud_utf8(value, char::is_uppercase)
                     }
                     ClaseChar::Space => {
-                        println!("en alpha");
+                        //println!("en alpha");
                         calcular_longitud_utf8(value, char::is_whitespace)
                     }
                     ClaseChar::Punct => {

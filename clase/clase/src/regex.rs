@@ -326,7 +326,7 @@ impl Regex {
                 Repeticion::Alguna(negacion) => {
                     let mut sigo_avanzando = true;
                     while sigo_avanzando {
-                        println!("paso: {:?}", paso.caracter_interno);
+                        //println!("paso: {:?}", paso.caracter_interno);
                         let avance = paso.caracter_interno.coincide(&linea[index..]);
 
                         if avance != 0 {
@@ -361,7 +361,7 @@ impl Regex {
                         if matches!(paso.caracter_interno, Caracter::Lista(_)) {
                             paso.caracter_interno =
                                 Caracter::Literal(linea.as_bytes()[index] as char);
-                            println!("nuevo paso: {:?}", paso.caracter_interno)
+                            //println!("nuevo paso: {:?}", paso.caracter_interno)
                         }
 
                         let avance = paso.caracter_interno.coincide(&linea[index..]);
@@ -399,7 +399,7 @@ fn backtrack(current: StepRegex, evaluated: &mut Vec<StepEvaluado>, next: &mut V
     while let Some(e) = evaluated.pop() {
         back_size += e.match_size;
         if e.backtrackable {
-            println!("backtrack {}", back_size);
+            //println!("backtrack {}", back_size);
             return Some(back_size);
         } else {
             next.push_front(e.paso);
@@ -454,7 +454,7 @@ mod tests {
         assert_eq!(regex.unwrap().es_valida("hol").unwrap(), false);
     }
 
-    #[test]
+     #[test]
     fn test07_regex_con_question() {
         let regex = Regex::new("hola?f");
         assert_eq!(regex.unwrap().es_valida("holaf").unwrap(), true);
