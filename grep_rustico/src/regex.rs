@@ -104,6 +104,151 @@ fn no_hay_anterior(anterior: &mut PasoRegex) -> bool {
         && anterior.repeticiones == Repeticion::Alguna(false)
 }
 
+fn fabricar_paso_punto() -> Result<Option<PasoRegex>, Error> {
+    Ok(Some(PasoRegex {
+        repeticiones: Repeticion::Exacta(1, false),
+        caracter_interno: Caracter::Comodin,
+    }))
+}
+
+fn fabricar_paso_literal(c: char) -> Result<Option<PasoRegex>, Error> {
+    Ok(Some(PasoRegex {
+        repeticiones: Repeticion::Exacta(1, false),
+        caracter_interno: Caracter::Literal(c),
+    }))
+}
+
+fn fabricar_paso_llave (steps: &mut [PasoRegex], chars_iter: &mut Chars<'_>) -> Result<Option<PasoRegex>, Error> {
+    if let Some(last) = steps.last_mut() {
+        let mut contenido: Vec<char> = Vec::new();
+        let mut rangos: Vec<usize> = Vec::new();
+        for c in chars_iter.by_ref() {
+            if c == ',' {
+                contenido.push(c);
+            } else if c == LLAVE_CERRADA {
+                break;
+            } else {
+                contenido.push(c);
+                match c.to_string().parse::<usize>() {
+                    Ok(cant) => rangos.push(cant),
+                    Err(_) => return Err(Error::ErrorEnLlaves),
+                }
+            }
+        }
+
+        if contenido.len() >= 2 {
+            if contenido[0] == ',' {
+                last.repeticiones = Repeticion::Rango {
+                    min: None,
+                    max: Some(rangos[0]),
+                };
+            } else if contenido[contenido.len() - 1] == ',' {
+                last.repeticiones = Repeticion::Rango {
+                    min: Some(rangos[0]),
+                    max: None,
+                };
+            } else {
+                last.repeticiones = Repeticion::Rango {
+                    min: Some(rangos[0]),
+                    max: Some(rangos[1]),
+                };
+            }
+        } else if contenido.len() == 1 && contenido[0].is_ascii_digit() {
+            last.repeticiones = Repeticion::Exacta(rangos[0], false);
+        } else {
+            return Err(Error::ErrorEnLlaves);
+        }
+    }
+
+    Ok(None)
+}
+
+fn fabricar_paso_corchete(chars_iter: &mut Chars<'_>) -> Result<Option<PasoRegex>, Error> {
+    match conseguir_lista(chars_iter) {
+        Ok(contenido) => Ok(Some(PasoRegex {
+            repeticiones: Repeticion::Exacta(1, contenido.1),
+            caracter_interno: Caracter::Serie(contenido.0),
+        })),
+        Err(error) => Err(error),
+    }
+}
+
+fn fabricar_paso_interrogacion(steps: &mut [PasoRegex]) -> Result<Option<PasoRegex>, Error> {
+    if let Some(last) = steps.last_mut() {
+        if no_hay_anterior(last) {
+            return Err(Error::ErrorEnRepeticion);
+        } else {
+            last.repeticiones = Repeticion::Rango {
+                min: Some(0),
+                max: Some(1),
+            };
+        }
+    }
+    Ok(None)
+}
+
+fn fabricar_paso_mas(steps: &mut [PasoRegex]) -> Result<Option<PasoRegex>, Error> {
+    if let Some(last) = steps.last_mut() {
+        if no_hay_anterior(last) {
+            return Err(Error::ErrorEnRepeticion);
+        } else {
+            last.repeticiones = Repeticion::Rango {
+                min: Some(1),
+                max: None,
+            };
+        }
+    }
+    Ok(None)
+}
+
+fn fabricar_paso_asterisco(steps: &mut [PasoRegex], chars_iter: &mut Chars<'_>) -> Result<Option<PasoRegex>, Error> {
+    if let Some(last) = steps.last_mut() {
+        if no_hay_anterior(last) {
+            return Err(Error::ErrorEnRepeticion);
+        } else {
+            match conseguir_lista(chars_iter) {
+                Ok((_, negado)) => last.repeticiones = Repeticion::Alguna(negado),
+                Err(error) => return Err(error),
+            };
+        }
+    }
+    Ok(None)
+}
+
+fn fabricar_paso_barra(chars_iter: &mut Chars<'_>) -> Result<Option<PasoRegex>, Error> {
+    match chars_iter.next() {
+        Some(literal) => Ok(Some(PasoRegex {
+            repeticiones: Repeticion::Exacta(1, false),
+            caracter_interno: Caracter::Literal(literal),
+        })),
+        None => Err(Error::CaracterNoProcesable),
+    }
+}
+
+fn fabricar_paso_dolar() -> Result<Option<PasoRegex>, Error> {
+    Ok(Some(PasoRegex {
+        repeticiones: Repeticion::Exacta(1, false),
+        caracter_interno: Caracter::Dolar,
+    }))
+}
+
+fn fabricar_paso_caracter(c: char, steps: &mut Vec<PasoRegex>, chars_iter: &mut Chars<'_>) -> Result<Option<PasoRegex>, Error> {
+    match c {
+        PUNTO => fabricar_paso_punto(),
+        'a'..='z' | 'A'..='Z' | '0'..='9' | ' ' => fabricar_paso_literal(c),
+        LLAVE_ABIERTA => fabricar_paso_llave(steps, chars_iter),
+        CORCHETE_ABIERTO => fabricar_paso_corchete(chars_iter),
+        INTERROGACION => fabricar_paso_interrogacion(steps),
+        ASTERISCO => fabricar_paso_asterisco(steps, chars_iter),
+        MAS => fabricar_paso_mas(steps),
+        BARRA => fabricar_paso_barra(chars_iter),
+        DOLAR => fabricar_paso_dolar(),
+        CARET => Ok(None),
+        FUNCION_OR => Ok(None),
+        _ => Err(Error::CaracterNoProcesable),
+    }
+}
+
 ///Agrega los pasos a la expresión regular.
 /// - Si el caracter es un punto, se agrega un paso con un comodín.
 /// - Si el caracter es un literal, se agrega un paso con el literal.
@@ -118,146 +263,12 @@ fn no_hay_anterior(anterior: &mut PasoRegex) -> bool {
 /// - Si el caracter es un caret, no se agrega un paso.
 /// - Si el caracter es una función OR, no se agrega un paso.
 /// - Si el caracter no es procesable, se devuelve un error.
-pub fn agregar_pasos(
-    steps: &mut Vec<PasoRegex>,
-    chars_iter: &mut Chars<'_>,
-) -> Result<Vec<PasoRegex>, Error> {
+pub fn agregar_pasos(steps: &mut Vec<PasoRegex>, chars_iter: &mut Chars<'_>) -> Result<Vec<PasoRegex>, Error> {
     while let Some(c) = chars_iter.next() {
-        let step = match c {
-            PUNTO => Some(PasoRegex {
-                repeticiones: Repeticion::Exacta(1, false),
-                caracter_interno: Caracter::Comodin,
-            }),
-
-            'a'..='z' | 'A'..='Z' | '0'..='9' | ' ' => Some(PasoRegex {
-                repeticiones: Repeticion::Exacta(1, false),
-                caracter_interno: Caracter::Literal(c),
-            }),
-
-            LLAVE_ABIERTA => {
-                if let Some(last) = steps.last_mut() {
-                    if no_hay_anterior(last) {
-                        return Err(Error::CaracterNoProcesable);
-                    } else if let Some(last) = steps.last_mut() {
-                        let mut contenido: Vec<char> = Vec::new();
-                        let mut rangos: Vec<usize> = Vec::new();
-                        for c in chars_iter.by_ref() {
-                            if c == ',' {
-                                contenido.push(c);
-                            } else if c == LLAVE_CERRADA {
-                                break;
-                            } else {
-                                contenido.push(c);
-                                match c.to_string().parse::<usize>() {
-                                    Ok(cant) => rangos.push(cant),
-                                    Err(_) => return Err(Error::ErrorEnLlaves),
-                                }
-                            }
-                        }
-
-                        if contenido.len() >= 2 {
-                            if contenido[0] == ',' {
-                                last.repeticiones = Repeticion::Rango {
-                                    min: None,
-                                    max: Some(rangos[0]),
-                                };
-                            } else if contenido[contenido.len() - 1] == ',' {
-                                last.repeticiones = Repeticion::Rango {
-                                    min: Some(rangos[0]),
-                                    max: None,
-                                };
-                            } else {
-                                last.repeticiones = Repeticion::Rango {
-                                    min: Some(rangos[0]),
-                                    max: Some(rangos[1]),
-                                };
-                            }
-                        } else if contenido.len() == 1 && contenido[0].is_ascii_digit() {
-                            last.repeticiones = Repeticion::Exacta(rangos[0], false);
-                        } else {
-                            return Err(Error::ErrorEnLlaves);
-                        }
-                    }
-                }
-
-                None
-            }
-
-            CORCHETE_ABIERTO => match conseguir_lista(chars_iter) {
-                Ok(contenido) => Some(PasoRegex {
-                    repeticiones: Repeticion::Exacta(1, contenido.1),
-                    caracter_interno: Caracter::Serie(contenido.0),
-                }),
-                Err(error) => return Err(error),
-            },
-
-            INTERROGACION => {
-                if let Some(last) = steps.last_mut() {
-                    if no_hay_anterior(last) {
-                        return Err(Error::ErrorEnRepeticion);
-                    } else {
-                        last.repeticiones = Repeticion::Rango {
-                            min: Some(0),
-                            max: Some(1),
-                        };
-                    }
-                }
-                None
-            }
-
-            ASTERISCO => {
-                if let Some(last) = steps.last_mut() {
-                    if no_hay_anterior(last) {
-                        return Err(Error::ErrorEnRepeticion);
-                    } else {
-                        match conseguir_lista(chars_iter) {
-                            Ok((_, negado)) => last.repeticiones = Repeticion::Alguna(negado),
-                            Err(error) => return Err(error),
-                        };
-                    }
-                }
-                None
-            }
-
-            MAS => {
-                if let Some(last) = steps.last_mut() {
-                    if no_hay_anterior(last) {
-                        return Err(Error::ErrorEnRepeticion);
-                    } else {
-                        last.repeticiones = Repeticion::Rango {
-                            min: Some(1),
-                            max: None,
-                        };
-                    }
-                }
-                None
-            }
-
-            BARRA => match chars_iter.next() {
-                Some(literal) => Some(PasoRegex {
-                    repeticiones: Repeticion::Exacta(1, false),
-                    caracter_interno: Caracter::Literal(literal),
-                }),
-                None => return Err(Error::CaracterNoProcesable),
-            },
-
-            DOLAR => Some(PasoRegex {
-                repeticiones: Repeticion::Exacta(1, false),
-                caracter_interno: Caracter::Dolar,
-            }),
-
-            CARET => None,
-
-            FUNCION_OR => None,
-
-            _ => return Err(Error::CaracterNoProcesable),
-        };
-
-        if let Some(p) = step {
-            steps.push(p);
+        if let Some(paso) = fabricar_paso_caracter(c, steps, chars_iter)? {
+            steps.push(paso);
         }
     }
-
     Ok(steps.to_vec())
 }
 
