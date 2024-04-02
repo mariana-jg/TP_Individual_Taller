@@ -29,7 +29,6 @@ pub fn puedo_procesar_archivo(args: &str) -> Result<Vec<String>, Error> {
     }
 }
 
-
 ///Verifica si la cantidad de argumentos ingresados es correcta.
 fn cantidad_correcta_argumentos(cantidad_argumentos: usize) -> bool {
     cantidad_argumentos == CANTIDAD_ARGUMENTOS
@@ -51,42 +50,54 @@ pub fn verificar_inicio(args: Vec<String>) -> Result<Vec<String>, Error> {
 
 mod tests {
     use super::*;
-    
-        #[test]
-        fn test01_cantidad_correcta_argumentos() {
-            assert_eq!(cantidad_correcta_argumentos(3), true);
-            assert_eq!(cantidad_correcta_argumentos(2), false);
-            assert_eq!(cantidad_correcta_argumentos(4), false);
-        }
 
-        ///Este test y el que sigue tiene en el primer assert un archivo de prueba
-        /// que queda adjuntado en la carpeta del proyecto.
-        #[test]
-        fn test02_verificar_inicio() {
-            assert_eq!(
-                verificar_inicio(vec![
-                    "cargo run".to_string(),
-                    "abcd".to_string(),
-                    "/home/mari/Escritorio/tp1_taller/grep_rustico/prueba.txt".to_string()
-                ]),
-                Ok(vec!["Hola".to_string(), "esto".to_string(), "es".to_string(), "una".to_string(), "prueba".to_string()])
-            );
-           assert_eq!(
-                verificar_inicio(vec![
-                    "cargo run".to_string(),
-                    "abcd".to_string(),
-                    "prueba.txt".to_string(),
-                    "prueba2.txt".to_string()
-                ]),
-                Err(Error::ArgumentosInvalidos)
-            ); 
-        }
-
-        #[test]
-        fn test03_puedo_procesar_archivo() {
-            assert_eq!(
-                puedo_procesar_archivo("/home/mari/Escritorio/tp1_taller/grep_rustico/prueba.txt"),
-                Ok(vec!["Hola".to_string(), "esto".to_string(), "es".to_string(), "una".to_string(), "prueba".to_string()])
-            );
-        }
+    #[test]
+    fn test01_cantidad_correcta_argumentos() {
+        assert_eq!(cantidad_correcta_argumentos(3), true);
+        assert_eq!(cantidad_correcta_argumentos(2), false);
+        assert_eq!(cantidad_correcta_argumentos(4), false);
     }
+
+    ///Este test y el que sigue tiene en el primer assert un archivo de prueba
+    /// que queda adjuntado en la carpeta del proyecto.
+    #[test]
+    fn test02_verificar_inicio() {
+        assert_eq!(
+            verificar_inicio(vec![
+                "cargo run".to_string(),
+                "abcd".to_string(),
+                "/home/mari/Escritorio/tp1_taller/grep_rustico/prueba.txt".to_string()
+            ]),
+            Ok(vec![
+                "Hola".to_string(),
+                "esto".to_string(),
+                "es".to_string(),
+                "una".to_string(),
+                "prueba".to_string()
+            ])
+        );
+        assert_eq!(
+            verificar_inicio(vec![
+                "cargo run".to_string(),
+                "abcd".to_string(),
+                "prueba.txt".to_string(),
+                "prueba2.txt".to_string()
+            ]),
+            Err(Error::ArgumentosInvalidos)
+        );
+    }
+
+    #[test]
+    fn test03_puedo_procesar_archivo() {
+        assert_eq!(
+            puedo_procesar_archivo("/home/mari/Escritorio/tp1_taller/grep_rustico/prueba.txt"),
+            Ok(vec![
+                "Hola".to_string(),
+                "esto".to_string(),
+                "es".to_string(),
+                "una".to_string(),
+                "prueba".to_string()
+            ])
+        );
+    }
+}

@@ -8,7 +8,6 @@ use crate::paso_evaluado::PasoEvaluado;
 use crate::paso_regex::PasoRegex;
 use crate::repeticion::Repeticion;
 
-
 ///Caracteres especiales que se utilizan en las expresiones regulares.
 const CORCHETE_ABIERTO: char = '[';
 const CORCHETE_CERRADO: char = ']';
@@ -24,6 +23,7 @@ const CARET: char = '^';
 const INDICADOR_CLASE: char = ':';
 const SEPARADOR_RANGO: char = '-';
 const FUNCION_OR: char = '|';
+
 ///Representa una expresión regular que se puede evaluar en una cadena de texto.
 /// Contiene una lista de pasos que se deben cumplir para que la expresión regular sea válida.
 pub struct Regex {
@@ -71,6 +71,9 @@ fn determinar_contenido_a_evaluar(auxiliar: Vec<char>) -> Result<HashSet<char>, 
 }
 
 ///Obtiene la clase de caracter que se debe evaluar.
+/// - Si la clase de caracter es una de las predefinidas, se devuelve la clase de caracter correspondiente.
+/// - Si la clase de caracter no es predefinida, se determina el contenido de la clase de caracter.
+/// - Si no se puede determinar el contenido de la clase de caracter, se devuelve un error.
 fn conseguir_lista(chars_iter: &mut Chars<'_>) -> Result<(ClaseChar, bool), Error> {
     let (auxiliar, hay_clase, es_negado) = obtener_auxiliar(chars_iter);
 
@@ -92,7 +95,7 @@ fn conseguir_lista(chars_iter: &mut Chars<'_>) -> Result<(ClaseChar, bool), Erro
     let contenido = determinar_contenido_a_evaluar(auxiliar);
 
     match contenido {
-        Ok(content) => Ok((ClaseChar::Simple(content), es_negado)),
+        Ok(contenido) => Ok((ClaseChar::Simple(contenido), es_negado)),
         Err(error) => Err(error),
     }
 }
@@ -119,7 +122,7 @@ fn fabricar_paso_literal(c: char) -> Result<Option<PasoRegex>, Error> {
 }
 
 fn fabricar_paso_llave (steps: &mut [PasoRegex], chars_iter: &mut Chars<'_>) -> Result<Option<PasoRegex>, Error> {
-    if let Some(last) = steps.last_mut() {
+    if let Some(ultimo) = steps.last_mut() {
         let mut contenido: Vec<char> = Vec::new();
         let mut rangos: Vec<usize> = Vec::new();
         for c in chars_iter.by_ref() {
@@ -138,23 +141,23 @@ fn fabricar_paso_llave (steps: &mut [PasoRegex], chars_iter: &mut Chars<'_>) -> 
 
         if contenido.len() >= 2 {
             if contenido[0] == ',' {
-                last.repeticiones = Repeticion::Rango {
+                ultimo.repeticiones = Repeticion::Rango {
                     min: None,
                     max: Some(rangos[0]),
                 };
             } else if contenido[contenido.len() - 1] == ',' {
-                last.repeticiones = Repeticion::Rango {
+                ultimo.repeticiones = Repeticion::Rango {
                     min: Some(rangos[0]),
                     max: None,
                 };
             } else {
-                last.repeticiones = Repeticion::Rango {
+                ultimo.repeticiones = Repeticion::Rango {
                     min: Some(rangos[0]),
                     max: Some(rangos[1]),
                 };
             }
         } else if contenido.len() == 1 && contenido[0].is_ascii_digit() {
-            last.repeticiones = Repeticion::Exacta(rangos[0], false);
+            ultimo.repeticiones = Repeticion::Exacta(rangos[0], false);
         } else {
             return Err(Error::ErrorEnLlaves);
         }
@@ -174,11 +177,11 @@ fn fabricar_paso_corchete(chars_iter: &mut Chars<'_>) -> Result<Option<PasoRegex
 }
 
 fn fabricar_paso_interrogacion(steps: &mut [PasoRegex]) -> Result<Option<PasoRegex>, Error> {
-    if let Some(last) = steps.last_mut() {
-        if no_hay_anterior(last) {
+    if let Some(ultimo) = steps.last_mut() {
+        if no_hay_anterior(ultimo) {
             return Err(Error::ErrorEnRepeticion);
         } else {
-            last.repeticiones = Repeticion::Rango {
+            ultimo.repeticiones = Repeticion::Rango {
                 min: Some(0),
                 max: Some(1),
             };
@@ -188,11 +191,11 @@ fn fabricar_paso_interrogacion(steps: &mut [PasoRegex]) -> Result<Option<PasoReg
 }
 
 fn fabricar_paso_mas(steps: &mut [PasoRegex]) -> Result<Option<PasoRegex>, Error> {
-    if let Some(last) = steps.last_mut() {
-        if no_hay_anterior(last) {
+    if let Some(ultimo) = steps.last_mut() {
+        if no_hay_anterior(ultimo) {
             return Err(Error::ErrorEnRepeticion);
         } else {
-            last.repeticiones = Repeticion::Rango {
+            ultimo.repeticiones = Repeticion::Rango {
                 min: Some(1),
                 max: None,
             };
@@ -202,12 +205,12 @@ fn fabricar_paso_mas(steps: &mut [PasoRegex]) -> Result<Option<PasoRegex>, Error
 }
 
 fn fabricar_paso_asterisco(steps: &mut [PasoRegex], chars_iter: &mut Chars<'_>) -> Result<Option<PasoRegex>, Error> {
-    if let Some(last) = steps.last_mut() {
-        if no_hay_anterior(last) {
+    if let Some(ultimo) = steps.last_mut() {
+        if no_hay_anterior(ultimo) {
             return Err(Error::ErrorEnRepeticion);
         } else {
             match conseguir_lista(chars_iter) {
-                Ok((_, negado)) => last.repeticiones = Repeticion::Alguna(negado),
+                Ok((_, negado)) => ultimo.repeticiones = Repeticion::Alguna(negado),
                 Err(error) => return Err(error),
             };
         }
@@ -232,7 +235,7 @@ fn fabricar_paso_dolar() -> Result<Option<PasoRegex>, Error> {
     }))
 }
 
-fn fabricar_paso_caracter(c: char, steps: &mut Vec<PasoRegex>, chars_iter: &mut Chars<'_>) -> Result<Option<PasoRegex>, Error> {
+fn fabricar_paso_caracter(c: char, steps: &mut [PasoRegex], chars_iter: &mut Chars<'_>) -> Result<Option<PasoRegex>, Error> {
     match c {
         PUNTO => fabricar_paso_punto(),
         'a'..='z' | 'A'..='Z' | '0'..='9' | ' ' => fabricar_paso_literal(c),
@@ -263,25 +266,25 @@ fn fabricar_paso_caracter(c: char, steps: &mut Vec<PasoRegex>, chars_iter: &mut 
 /// - Si el caracter es un caret, no se agrega un paso.
 /// - Si el caracter es una función OR, no se agrega un paso.
 /// - Si el caracter no es procesable, se devuelve un error.
-pub fn agregar_pasos(steps: &mut Vec<PasoRegex>, chars_iter: &mut Chars<'_>) -> Result<Vec<PasoRegex>, Error> {
+pub fn agregar_pasos(pasos: &mut Vec<PasoRegex>, chars_iter: &mut Chars<'_>) -> Result<Vec<PasoRegex>, Error> {
     while let Some(c) = chars_iter.next() {
-        if let Some(paso) = fabricar_paso_caracter(c, steps, chars_iter)? {
-            steps.push(paso);
+        if let Some(paso) = fabricar_paso_caracter(c, pasos, chars_iter)? {
+            pasos.push(paso);
         }
     }
-    Ok(steps.to_vec())
+    Ok(pasos.to_vec())
 }
 
 ///Determina si se debe agregar un paso con un comodín al principio de la expresión regular
 ///(como un .*), si esta no comienza con un CARET ^.
-fn definir_uso_de_caret(expression: &str, steps: &mut Vec<PasoRegex>) {
-    if !expression.starts_with(CARET) {
+fn definir_uso_de_caret(expresion: &str, pasos: &mut Vec<PasoRegex>) {
+    if !expresion.starts_with(CARET) {
         let paso = Some(PasoRegex {
             repeticiones: Repeticion::Alguna(false),
             caracter_interno: Caracter::Comodin,
         });
         if let Some(p) = paso {
-            steps.push(p);
+            pasos.push(p);
         }
     }
 }
@@ -317,7 +320,6 @@ fn expresion_escrita_correctamente(expresion: &str) -> Result<(), Error> {
     Ok(())
 }
 
-
 impl Regex {
 
     ///Verifica si una expresión regular es válida para una línea de texto.
@@ -349,15 +351,15 @@ impl Regex {
 
     ///Crea una nueva expresión regular a partir de una cadena de texto.
     /// Teniendo en cuenta si comienza con un CARET ^ o no.
-    pub fn new(expression: &str) -> Result<Self, Error> {
-        let mut steps: Vec<PasoRegex> = Vec::new();
-        let mut chars_iter = expression.chars();
+    pub fn new(expresion: &str) -> Result<Self, Error> {
+        let mut pasos: Vec<PasoRegex> = Vec::new();
+        let mut chars_iter = expresion.chars();
 
-        definir_uso_de_caret(expression, &mut steps);
+        definir_uso_de_caret(expresion, &mut pasos);
 
-        let steps: Vec<PasoRegex> = agregar_pasos(&mut steps, &mut chars_iter)?;
+        let pasos: Vec<PasoRegex> = agregar_pasos(&mut pasos, &mut chars_iter)?;
 
-        Ok(Regex { pasos: steps })
+        Ok(Regex { pasos })
     }
 
     ///Verifica si una expresión regular es válida para una línea de texto.
@@ -468,9 +470,6 @@ impl Regex {
 }
 
 ///Realiza un backtrack en la expresión regular.
-/// - Si el paso es backtrackeable, se devuelve el tamaño del matcheo.
-/// - Si el paso no es backtrackeable, se agrega el paso a la cola de pasos.
-/// - Si no se puede hacer un backtrack, se devuelve None.
 fn backtrack(
     actual: PasoRegex,
     evaluados: &mut Vec<PasoEvaluado>,
