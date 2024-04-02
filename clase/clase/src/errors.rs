@@ -10,6 +10,7 @@ pub enum Error {
     ErrorEnLlaves,
     ErrorEnCorchetes,
     ErrorEnRepeticion,
+    ErrorEnFuncionOR,
 }
 
 impl fmt::Display for Error {
@@ -37,6 +38,9 @@ impl fmt::Display for Error {
             }
             Error::ErrorEnRepeticion => {
                 write!(f, "Error: No se cumple con el formato para el uso de las repeticiones correctamente.")
+            }
+            Error::ErrorEnFuncionOR => {
+                write!(f, "Error: No se cumple con el formato para el uso de la funcion OR correctamente.")
             }
         }
     }

@@ -23,7 +23,6 @@ const INDICADOR_CLASE: char = ':';
 const SEPARADOR_RANGO: char = '-';
 const FUNCION_OR: char = '|';
 
-///este struct representa una expresion regular
 pub struct Regex {
     pasos: Vec<PasoRegex>,
 }
@@ -58,8 +57,6 @@ fn determinar_contenido_a_evaluar(auxiliar: Vec<char>) -> Result<HashSet<char>, 
             if let (Some(inicio), Some(fin)) = (auxiliar.get(i - 1), auxiliar.get(i + 1)) {
                 contenido.extend(*inicio..=*fin);
             }
-        } else if auxiliar[i] == FUNCION_OR {
-            return Err(Error::ErrorEnCorchetes);
         } else {
             contenido.insert(auxiliar[i]);
         }
@@ -102,7 +99,6 @@ pub fn agregar_pasos(
     steps: &mut Vec<PasoRegex>,
     chars_iter: &mut Chars<'_>,
 ) -> Result<Vec<PasoRegex>, Error> {
-    let mut cont_llaves = 0;
     while let Some(c) = chars_iter.next() {
         let step = match c {
             PUNTO => Some(PasoRegex {
@@ -120,14 +116,12 @@ pub fn agregar_pasos(
                     if no_hay_anterior(last) {
                         return Err(Error::CaracterNoProcesable);
                     } else if let Some(last) = steps.last_mut() {
-                        cont_llaves += 1;
                         let mut contenido: Vec<char> = Vec::new();
                         let mut rangos: Vec<usize> = Vec::new();
                         for c in chars_iter.by_ref() {
                             if c == ',' {
                                 contenido.push(c);
                             } else if c == LLAVE_CERRADA {
-                                cont_llaves -= 1;
                                 break;
                             } else {
                                 contenido.push(c);
@@ -233,16 +227,9 @@ pub fn agregar_pasos(
 
             FUNCION_OR => None,
 
-            LLAVE_CERRADA => return Err(Error::ErrorEnLlaves),
-
-            CORCHETE_CERRADO => return Err(Error::ErrorEnCorchetes),
-
             _ => return Err(Error::CaracterNoProcesable),
         };
 
-        if cont_llaves > 0 {
-            return Err(Error::ErrorEnLlaves);
-        }
         if let Some(p) = step {
             steps.push(p);
         }
@@ -263,73 +250,54 @@ fn definir_uso_de_caret(expression: &str, steps: &mut Vec<PasoRegex>) {
     }
 }
 
-fn expresion_es_correcta(expresion: &str) -> bool{
-    //aca voy a verificar que cada llave se abra y cierra, mismo con corchetes y otras cosas
+fn expresion_escrita_correctamente(expresion: &str) -> Result<(), Error> {
     let mut iter = expresion.chars();
     let mut cont_llaves = 0;
     let mut cont_corchetes = 0;
-    let mut cont_barras = 0;
-    let mut cont_puntos = 0;
-    let mut cont_asteriscos = 0;
-    let mut cont_interrogaciones = 0;
-    let mut cont_mas = 0;
-    let mut cont_dolares = 0;
-    let mut cont_caret = 0;
-    let mut cont_or = 0;
-//queda a arreglar este tema
     while let Some(c) = iter.next() {
         match c {
             LLAVE_ABIERTA => cont_llaves += 1,
             LLAVE_CERRADA => cont_llaves -= 1,
             CORCHETE_ABIERTO => cont_corchetes += 1,
             CORCHETE_CERRADO => cont_corchetes -= 1,
-            BARRA => cont_barras += 1,
-            PUNTO => cont_puntos += 1,
-            ASTERISCO => cont_asteriscos += 1,
-            INTERROGACION => cont_interrogaciones += 1,
-            MAS => cont_mas += 1,
-            DOLAR => cont_dolares += 1,
-            CARET => cont_caret += 1,
-            FUNCION_OR => cont_or += 1,
+            FUNCION_OR => {
+                if cont_llaves != 0 || cont_corchetes != 0 {
+                    return Err(Error::ErrorEnFuncionOR);
+                }
+            }
             _ => {}
         }
     }
-
-    if cont_llaves != 0
-        || cont_corchetes != 0
-        || cont_barras != 0
-        || cont_puntos != 0
-        || cont_asteriscos != 0
-        || cont_interrogaciones != 0
-        || cont_mas != 0
-        || cont_dolares != 0
-        || cont_caret != 0
-        || cont_or != 0
-    {
-        return false;
-}
+    if cont_llaves != 0 {
+        return Err(Error::ErrorEnLlaves);
+    }
+    if cont_corchetes != 0 {
+        return Err(Error::ErrorEnCorchetes);
+    }
+    Ok(())
 }
 impl Regex {
     pub fn es_valida_general(expresion_completa: &str, linea: &str) -> Result<bool, Error> {
         let mut valida = false;
-//esto puede devolver nada o un error
-        if !expresion_es_correcta(expresion_completa) {
-            return Err(Error::CaracterNoProcesable);
-        }
 
-        let expresiones_a_evaluar: Vec<&str> = expresion_completa.split('|').collect();
+        match expresion_escrita_correctamente(expresion_completa) {
+            Ok(_) => {
+                let expresiones_a_evaluar: Vec<&str> = expresion_completa.split('|').collect();
 
-        for exp in expresiones_a_evaluar {
-            let regex = match Regex::new(exp) {
-                Ok(regex) => regex,
-                Err(err) => return Err(err),
-            };
-            if regex.es_valida(linea)? {
-                valida = true;
-                break;
+                for exp in expresiones_a_evaluar {
+                    let regex = match Regex::new(exp) {
+                        Ok(regex) => regex,
+                        Err(err) => return Err(err),
+                    };
+                    if regex.es_valida(linea)? {
+                        valida = true;
+                        break;
+                    }
+                }
+                Ok(valida)
             }
+            Err(error) => return Err(error),
         }
-        Ok(valida)
     }
 
     pub fn new(expression: &str) -> Result<Self, Error> {
