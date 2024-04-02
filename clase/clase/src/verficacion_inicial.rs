@@ -8,7 +8,7 @@ use errors::Error;
 use crate::errors;
 
 pub fn puedo_procesar_archivo(args: &str) -> Result<Vec<String>, Error> {
-    let archivo = File::open(args.to_string());
+    let archivo = File::open(args);
     match archivo {
         Ok(archivo) => {
             let mut lineas: Vec<String> = vec![];
@@ -20,14 +20,14 @@ pub fn puedo_procesar_archivo(args: &str) -> Result<Vec<String>, Error> {
                 };
             }
 
-            return Ok(lineas);
+            Ok(lineas)
         }
-        Err(_err) => return Err(Error::FallaAbrirArchivo),
-    };
+        Err(_err) => Err(Error::FallaAbrirArchivo),
+    }
 }
 
 fn cantidad_correcta_argumentos(cantidad_argumentos: usize) -> bool {
-    return cantidad_argumentos == 3;
+    cantidad_argumentos == 3
 }
 
 pub fn verificar_inicio(args: Vec<String>) -> Result<Vec<String>, Error> {
@@ -35,8 +35,5 @@ pub fn verificar_inicio(args: Vec<String>) -> Result<Vec<String>, Error> {
         return Err(Error::ArgumentosInvalidos);
     }
 
-    match puedo_procesar_archivo(&args[args.len() - 1]) {
-        Ok(lineas) => return Ok(lineas),
-        Err(error) => return Err(error),
-    }
+    puedo_procesar_archivo(&args[args.len() - 1])
 }

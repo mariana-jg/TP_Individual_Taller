@@ -7,6 +7,9 @@ pub enum Error {
     ArgumentosInvalidos,
     CaracterNoProcesable,
     FormatoDeLineaNoASCII,
+    ErrorEnLlaves,
+    ErrorEnCorchetes,
+    ErrorEnRepeticion,
 }
 
 impl fmt::Display for Error {
@@ -22,6 +25,18 @@ impl fmt::Display for Error {
             }
             Error::FormatoDeLineaNoASCII => {
                 write!(f, "Error: La linea ingresada no esta en formato ASCII.")
+            }
+            Error::ErrorEnLlaves => {
+                write!(
+                    f,
+                    "Error: No se cumple con el formato para el uso de las llaves correctamente."
+                )
+            }
+            Error::ErrorEnCorchetes => {
+                write!(f, "Error: No se cumple con el formato para el uso de los corchetes correctamente.")
+            }
+            Error::ErrorEnRepeticion => {
+                write!(f, "Error: No se cumple con el formato para el uso de las repeticiones correctamente.")
             }
         }
     }
