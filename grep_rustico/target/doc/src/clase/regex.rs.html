@@ -1026,6 +1026,15 @@
 <a href="#1025" id="1025">1025</a>
 <a href="#1026" id="1026">1026</a>
 <a href="#1027" id="1027">1027</a>
+<a href="#1028" id="1028">1028</a>
+<a href="#1029" id="1029">1029</a>
+<a href="#1030" id="1030">1030</a>
+<a href="#1031" id="1031">1031</a>
+<a href="#1032" id="1032">1032</a>
+<a href="#1033" id="1033">1033</a>
+<a href="#1034" id="1034">1034</a>
+<a href="#1035" id="1035">1035</a>
+<a href="#1036" id="1036">1036</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::{HashSet, VecDeque};
 <span class="kw">use </span>std::str::Chars;
 
@@ -1035,7 +1044,6 @@
 <span class="kw">use </span><span class="kw">crate</span>::paso_evaluado::PasoEvaluado;
 <span class="kw">use </span><span class="kw">crate</span>::paso_regex::PasoRegex;
 <span class="kw">use </span><span class="kw">crate</span>::repeticion::Repeticion;
-
 
 <span class="doccomment">///Caracteres especiales que se utilizan en las expresiones regulares.
 </span><span class="kw">const </span>CORCHETE_ABIERTO: char = <span class="string">'['</span>;
@@ -1052,6 +1060,7 @@
 <span class="kw">const </span>INDICADOR_CLASE: char = <span class="string">':'</span>;
 <span class="kw">const </span>SEPARADOR_RANGO: char = <span class="string">'-'</span>;
 <span class="kw">const </span>FUNCION_OR: char = <span class="string">'|'</span>;
+
 <span class="doccomment">///Representa una expresión regular que se puede evaluar en una cadena de texto.
 /// Contiene una lista de pasos que se deben cumplir para que la expresión regular sea válida.
 </span><span class="kw">pub struct </span>Regex {
@@ -1099,6 +1108,9 @@
 }
 
 <span class="doccomment">///Obtiene la clase de caracter que se debe evaluar.
+/// - Si la clase de caracter es una de las predefinidas, se devuelve la clase de caracter correspondiente.
+/// - Si la clase de caracter no es predefinida, se determina el contenido de la clase de caracter.
+/// - Si no se puede determinar el contenido de la clase de caracter, se devuelve un error.
 </span><span class="kw">fn </span>conseguir_lista(chars_iter: <span class="kw-2">&amp;mut </span>Chars&lt;<span class="lifetime">'_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;(ClaseChar, bool), Error&gt; {
     <span class="kw">let </span>(auxiliar, hay_clase, es_negado) = obtener_auxiliar(chars_iter);
 
@@ -1120,7 +1132,7 @@
     <span class="kw">let </span>contenido = determinar_contenido_a_evaluar(auxiliar);
 
     <span class="kw">match </span>contenido {
-        <span class="prelude-val">Ok</span>(content) =&gt; <span class="prelude-val">Ok</span>((ClaseChar::Simple(content), es_negado)),
+        <span class="prelude-val">Ok</span>(contenido) =&gt; <span class="prelude-val">Ok</span>((ClaseChar::Simple(contenido), es_negado)),
         <span class="prelude-val">Err</span>(error) =&gt; <span class="prelude-val">Err</span>(error),
     }
 }
@@ -1130,6 +1142,151 @@
 </span><span class="kw">fn </span>no_hay_anterior(anterior: <span class="kw-2">&amp;mut </span>PasoRegex) -&gt; bool {
     anterior.caracter_interno == Caracter::Comodin
         &amp;&amp; anterior.repeticiones == Repeticion::Alguna(<span class="bool-val">false</span>)
+}
+
+<span class="kw">fn </span>fabricar_paso_punto() -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;PasoRegex&gt;, Error&gt; {
+    <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(PasoRegex {
+        repeticiones: Repeticion::Exacta(<span class="number">1</span>, <span class="bool-val">false</span>),
+        caracter_interno: Caracter::Comodin,
+    }))
+}
+
+<span class="kw">fn </span>fabricar_paso_literal(c: char) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;PasoRegex&gt;, Error&gt; {
+    <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(PasoRegex {
+        repeticiones: Repeticion::Exacta(<span class="number">1</span>, <span class="bool-val">false</span>),
+        caracter_interno: Caracter::Literal(c),
+    }))
+}
+
+<span class="kw">fn </span>fabricar_paso_llave (steps: <span class="kw-2">&amp;mut </span>[PasoRegex], chars_iter: <span class="kw-2">&amp;mut </span>Chars&lt;<span class="lifetime">'_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;PasoRegex&gt;, Error&gt; {
+    <span class="kw">if let </span><span class="prelude-val">Some</span>(ultimo) = steps.last_mut() {
+        <span class="kw">let </span><span class="kw-2">mut </span>contenido: Vec&lt;char&gt; = Vec::new();
+        <span class="kw">let </span><span class="kw-2">mut </span>rangos: Vec&lt;usize&gt; = Vec::new();
+        <span class="kw">for </span>c <span class="kw">in </span>chars_iter.by_ref() {
+            <span class="kw">if </span>c == <span class="string">',' </span>{
+                contenido.push(c);
+            } <span class="kw">else if </span>c == LLAVE_CERRADA {
+                <span class="kw">break</span>;
+            } <span class="kw">else </span>{
+                contenido.push(c);
+                <span class="kw">match </span>c.to_string().parse::&lt;usize&gt;() {
+                    <span class="prelude-val">Ok</span>(cant) =&gt; rangos.push(cant),
+                    <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(Error::ErrorEnLlaves),
+                }
+            }
+        }
+
+        <span class="kw">if </span>contenido.len() &gt;= <span class="number">2 </span>{
+            <span class="kw">if </span>contenido[<span class="number">0</span>] == <span class="string">',' </span>{
+                ultimo.repeticiones = Repeticion::Rango {
+                    min: <span class="prelude-val">None</span>,
+                    max: <span class="prelude-val">Some</span>(rangos[<span class="number">0</span>]),
+                };
+            } <span class="kw">else if </span>contenido[contenido.len() - <span class="number">1</span>] == <span class="string">',' </span>{
+                ultimo.repeticiones = Repeticion::Rango {
+                    min: <span class="prelude-val">Some</span>(rangos[<span class="number">0</span>]),
+                    max: <span class="prelude-val">None</span>,
+                };
+            } <span class="kw">else </span>{
+                ultimo.repeticiones = Repeticion::Rango {
+                    min: <span class="prelude-val">Some</span>(rangos[<span class="number">0</span>]),
+                    max: <span class="prelude-val">Some</span>(rangos[<span class="number">1</span>]),
+                };
+            }
+        } <span class="kw">else if </span>contenido.len() == <span class="number">1 </span>&amp;&amp; contenido[<span class="number">0</span>].is_ascii_digit() {
+            ultimo.repeticiones = Repeticion::Exacta(rangos[<span class="number">0</span>], <span class="bool-val">false</span>);
+        } <span class="kw">else </span>{
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::ErrorEnLlaves);
+        }
+    }
+
+    <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)
+}
+
+<span class="kw">fn </span>fabricar_paso_corchete(chars_iter: <span class="kw-2">&amp;mut </span>Chars&lt;<span class="lifetime">'_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;PasoRegex&gt;, Error&gt; {
+    <span class="kw">match </span>conseguir_lista(chars_iter) {
+        <span class="prelude-val">Ok</span>(contenido) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(PasoRegex {
+            repeticiones: Repeticion::Exacta(<span class="number">1</span>, contenido.<span class="number">1</span>),
+            caracter_interno: Caracter::Serie(contenido.<span class="number">0</span>),
+        })),
+        <span class="prelude-val">Err</span>(error) =&gt; <span class="prelude-val">Err</span>(error),
+    }
+}
+
+<span class="kw">fn </span>fabricar_paso_interrogacion(steps: <span class="kw-2">&amp;mut </span>[PasoRegex]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;PasoRegex&gt;, Error&gt; {
+    <span class="kw">if let </span><span class="prelude-val">Some</span>(ultimo) = steps.last_mut() {
+        <span class="kw">if </span>no_hay_anterior(ultimo) {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::ErrorEnRepeticion);
+        } <span class="kw">else </span>{
+            ultimo.repeticiones = Repeticion::Rango {
+                min: <span class="prelude-val">Some</span>(<span class="number">0</span>),
+                max: <span class="prelude-val">Some</span>(<span class="number">1</span>),
+            };
+        }
+    }
+    <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)
+}
+
+<span class="kw">fn </span>fabricar_paso_mas(steps: <span class="kw-2">&amp;mut </span>[PasoRegex]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;PasoRegex&gt;, Error&gt; {
+    <span class="kw">if let </span><span class="prelude-val">Some</span>(ultimo) = steps.last_mut() {
+        <span class="kw">if </span>no_hay_anterior(ultimo) {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::ErrorEnRepeticion);
+        } <span class="kw">else </span>{
+            ultimo.repeticiones = Repeticion::Rango {
+                min: <span class="prelude-val">Some</span>(<span class="number">1</span>),
+                max: <span class="prelude-val">None</span>,
+            };
+        }
+    }
+    <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)
+}
+
+<span class="kw">fn </span>fabricar_paso_asterisco(steps: <span class="kw-2">&amp;mut </span>[PasoRegex], chars_iter: <span class="kw-2">&amp;mut </span>Chars&lt;<span class="lifetime">'_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;PasoRegex&gt;, Error&gt; {
+    <span class="kw">if let </span><span class="prelude-val">Some</span>(ultimo) = steps.last_mut() {
+        <span class="kw">if </span>no_hay_anterior(ultimo) {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::ErrorEnRepeticion);
+        } <span class="kw">else </span>{
+            <span class="kw">match </span>conseguir_lista(chars_iter) {
+                <span class="prelude-val">Ok</span>((<span class="kw">_</span>, negado)) =&gt; ultimo.repeticiones = Repeticion::Alguna(negado),
+                <span class="prelude-val">Err</span>(error) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(error),
+            };
+        }
+    }
+    <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)
+}
+
+<span class="kw">fn </span>fabricar_paso_barra(chars_iter: <span class="kw-2">&amp;mut </span>Chars&lt;<span class="lifetime">'_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;PasoRegex&gt;, Error&gt; {
+    <span class="kw">match </span>chars_iter.next() {
+        <span class="prelude-val">Some</span>(literal) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(PasoRegex {
+            repeticiones: Repeticion::Exacta(<span class="number">1</span>, <span class="bool-val">false</span>),
+            caracter_interno: Caracter::Literal(literal),
+        })),
+        <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Err</span>(Error::CaracterNoProcesable),
+    }
+}
+
+<span class="kw">fn </span>fabricar_paso_dolar() -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;PasoRegex&gt;, Error&gt; {
+    <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(PasoRegex {
+        repeticiones: Repeticion::Exacta(<span class="number">1</span>, <span class="bool-val">false</span>),
+        caracter_interno: Caracter::Dolar,
+    }))
+}
+
+<span class="kw">fn </span>fabricar_paso_caracter(c: char, steps: <span class="kw-2">&amp;mut </span>[PasoRegex], chars_iter: <span class="kw-2">&amp;mut </span>Chars&lt;<span class="lifetime">'_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;PasoRegex&gt;, Error&gt; {
+    <span class="kw">match </span>c {
+        PUNTO =&gt; fabricar_paso_punto(),
+        <span class="string">'a'</span>..=<span class="string">'z' </span>| <span class="string">'A'</span>..=<span class="string">'Z' </span>| <span class="string">'0'</span>..=<span class="string">'9' </span>| <span class="string">' ' </span>=&gt; fabricar_paso_literal(c),
+        LLAVE_ABIERTA =&gt; fabricar_paso_llave(steps, chars_iter),
+        CORCHETE_ABIERTO =&gt; fabricar_paso_corchete(chars_iter),
+        INTERROGACION =&gt; fabricar_paso_interrogacion(steps),
+        ASTERISCO =&gt; fabricar_paso_asterisco(steps, chars_iter),
+        MAS =&gt; fabricar_paso_mas(steps),
+        BARRA =&gt; fabricar_paso_barra(chars_iter),
+        DOLAR =&gt; fabricar_paso_dolar(),
+        CARET =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
+        FUNCION_OR =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
+        <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(Error::CaracterNoProcesable),
+    }
 }
 
 <span class="doccomment">///Agrega los pasos a la expresión regular.
@@ -1146,159 +1303,25 @@
 /// - Si el caracter es un caret, no se agrega un paso.
 /// - Si el caracter es una función OR, no se agrega un paso.
 /// - Si el caracter no es procesable, se devuelve un error.
-</span><span class="kw">pub fn </span>agregar_pasos(
-    steps: <span class="kw-2">&amp;mut </span>Vec&lt;PasoRegex&gt;,
-    chars_iter: <span class="kw-2">&amp;mut </span>Chars&lt;<span class="lifetime">'_</span>&gt;,
-) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;PasoRegex&gt;, Error&gt; {
+</span><span class="kw">pub fn </span>agregar_pasos(pasos: <span class="kw-2">&amp;mut </span>Vec&lt;PasoRegex&gt;, chars_iter: <span class="kw-2">&amp;mut </span>Chars&lt;<span class="lifetime">'_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;PasoRegex&gt;, Error&gt; {
     <span class="kw">while let </span><span class="prelude-val">Some</span>(c) = chars_iter.next() {
-        <span class="kw">let </span>step = <span class="kw">match </span>c {
-            PUNTO =&gt; <span class="prelude-val">Some</span>(PasoRegex {
-                repeticiones: Repeticion::Exacta(<span class="number">1</span>, <span class="bool-val">false</span>),
-                caracter_interno: Caracter::Comodin,
-            }),
-
-            <span class="string">'a'</span>..=<span class="string">'z' </span>| <span class="string">'A'</span>..=<span class="string">'Z' </span>| <span class="string">'0'</span>..=<span class="string">'9' </span>| <span class="string">' ' </span>=&gt; <span class="prelude-val">Some</span>(PasoRegex {
-                repeticiones: Repeticion::Exacta(<span class="number">1</span>, <span class="bool-val">false</span>),
-                caracter_interno: Caracter::Literal(c),
-            }),
-
-            LLAVE_ABIERTA =&gt; {
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(last) = steps.last_mut() {
-                    <span class="kw">if </span>no_hay_anterior(last) {
-                        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::CaracterNoProcesable);
-                    } <span class="kw">else if let </span><span class="prelude-val">Some</span>(last) = steps.last_mut() {
-                        <span class="kw">let </span><span class="kw-2">mut </span>contenido: Vec&lt;char&gt; = Vec::new();
-                        <span class="kw">let </span><span class="kw-2">mut </span>rangos: Vec&lt;usize&gt; = Vec::new();
-                        <span class="kw">for </span>c <span class="kw">in </span>chars_iter.by_ref() {
-                            <span class="kw">if </span>c == <span class="string">',' </span>{
-                                contenido.push(c);
-                            } <span class="kw">else if </span>c == LLAVE_CERRADA {
-                                <span class="kw">break</span>;
-                            } <span class="kw">else </span>{
-                                contenido.push(c);
-                                <span class="kw">match </span>c.to_string().parse::&lt;usize&gt;() {
-                                    <span class="prelude-val">Ok</span>(cant) =&gt; rangos.push(cant),
-                                    <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(Error::ErrorEnLlaves),
-                                }
-                            }
-                        }
-
-                        <span class="kw">if </span>contenido.len() &gt;= <span class="number">2 </span>{
-                            <span class="kw">if </span>contenido[<span class="number">0</span>] == <span class="string">',' </span>{
-                                last.repeticiones = Repeticion::Rango {
-                                    min: <span class="prelude-val">None</span>,
-                                    max: <span class="prelude-val">Some</span>(rangos[<span class="number">0</span>]),
-                                };
-                            } <span class="kw">else if </span>contenido[contenido.len() - <span class="number">1</span>] == <span class="string">',' </span>{
-                                last.repeticiones = Repeticion::Rango {
-                                    min: <span class="prelude-val">Some</span>(rangos[<span class="number">0</span>]),
-                                    max: <span class="prelude-val">None</span>,
-                                };
-                            } <span class="kw">else </span>{
-                                last.repeticiones = Repeticion::Rango {
-                                    min: <span class="prelude-val">Some</span>(rangos[<span class="number">0</span>]),
-                                    max: <span class="prelude-val">Some</span>(rangos[<span class="number">1</span>]),
-                                };
-                            }
-                        } <span class="kw">else if </span>contenido.len() == <span class="number">1 </span>&amp;&amp; contenido[<span class="number">0</span>].is_ascii_digit() {
-                            last.repeticiones = Repeticion::Exacta(rangos[<span class="number">0</span>], <span class="bool-val">false</span>);
-                        } <span class="kw">else </span>{
-                            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::ErrorEnLlaves);
-                        }
-                    }
-                }
-
-                <span class="prelude-val">None
-            </span>}
-
-            CORCHETE_ABIERTO =&gt; <span class="kw">match </span>conseguir_lista(chars_iter) {
-                <span class="prelude-val">Ok</span>(contenido) =&gt; <span class="prelude-val">Some</span>(PasoRegex {
-                    repeticiones: Repeticion::Exacta(<span class="number">1</span>, contenido.<span class="number">1</span>),
-                    caracter_interno: Caracter::Serie(contenido.<span class="number">0</span>),
-                }),
-                <span class="prelude-val">Err</span>(error) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(error),
-            },
-
-            INTERROGACION =&gt; {
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(last) = steps.last_mut() {
-                    <span class="kw">if </span>no_hay_anterior(last) {
-                        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::ErrorEnRepeticion);
-                    } <span class="kw">else </span>{
-                        last.repeticiones = Repeticion::Rango {
-                            min: <span class="prelude-val">Some</span>(<span class="number">0</span>),
-                            max: <span class="prelude-val">Some</span>(<span class="number">1</span>),
-                        };
-                    }
-                }
-                <span class="prelude-val">None
-            </span>}
-
-            ASTERISCO =&gt; {
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(last) = steps.last_mut() {
-                    <span class="kw">if </span>no_hay_anterior(last) {
-                        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::ErrorEnRepeticion);
-                    } <span class="kw">else </span>{
-                        <span class="kw">match </span>conseguir_lista(chars_iter) {
-                            <span class="prelude-val">Ok</span>((<span class="kw">_</span>, negado)) =&gt; last.repeticiones = Repeticion::Alguna(negado),
-                            <span class="prelude-val">Err</span>(error) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(error),
-                        };
-                    }
-                }
-                <span class="prelude-val">None
-            </span>}
-
-            MAS =&gt; {
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(last) = steps.last_mut() {
-                    <span class="kw">if </span>no_hay_anterior(last) {
-                        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::ErrorEnRepeticion);
-                    } <span class="kw">else </span>{
-                        last.repeticiones = Repeticion::Rango {
-                            min: <span class="prelude-val">Some</span>(<span class="number">1</span>),
-                            max: <span class="prelude-val">None</span>,
-                        };
-                    }
-                }
-                <span class="prelude-val">None
-            </span>}
-
-            BARRA =&gt; <span class="kw">match </span>chars_iter.next() {
-                <span class="prelude-val">Some</span>(literal) =&gt; <span class="prelude-val">Some</span>(PasoRegex {
-                    repeticiones: Repeticion::Exacta(<span class="number">1</span>, <span class="bool-val">false</span>),
-                    caracter_interno: Caracter::Literal(literal),
-                }),
-                <span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(Error::CaracterNoProcesable),
-            },
-
-            DOLAR =&gt; <span class="prelude-val">Some</span>(PasoRegex {
-                repeticiones: Repeticion::Exacta(<span class="number">1</span>, <span class="bool-val">false</span>),
-                caracter_interno: Caracter::Dolar,
-            }),
-
-            CARET =&gt; <span class="prelude-val">None</span>,
-
-            FUNCION_OR =&gt; <span class="prelude-val">None</span>,
-
-            <span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(Error::CaracterNoProcesable),
-        };
-
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(p) = step {
-            steps.push(p);
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(paso) = fabricar_paso_caracter(c, pasos, chars_iter)<span class="question-mark">? </span>{
+            pasos.push(paso);
         }
     }
-
-    <span class="prelude-val">Ok</span>(steps.to_vec())
+    <span class="prelude-val">Ok</span>(pasos.to_vec())
 }
 
 <span class="doccomment">///Determina si se debe agregar un paso con un comodín al principio de la expresión regular
 ///(como un .*), si esta no comienza con un CARET ^.
-</span><span class="kw">fn </span>definir_uso_de_caret(expression: <span class="kw-2">&amp;</span>str, steps: <span class="kw-2">&amp;mut </span>Vec&lt;PasoRegex&gt;) {
-    <span class="kw">if </span>!expression.starts_with(CARET) {
+</span><span class="kw">fn </span>definir_uso_de_caret(expresion: <span class="kw-2">&amp;</span>str, pasos: <span class="kw-2">&amp;mut </span>Vec&lt;PasoRegex&gt;) {
+    <span class="kw">if </span>!expresion.starts_with(CARET) {
         <span class="kw">let </span>paso = <span class="prelude-val">Some</span>(PasoRegex {
             repeticiones: Repeticion::Alguna(<span class="bool-val">false</span>),
             caracter_interno: Caracter::Comodin,
         });
         <span class="kw">if let </span><span class="prelude-val">Some</span>(p) = paso {
-            steps.push(p);
+            pasos.push(p);
         }
     }
 }
@@ -1308,10 +1331,10 @@
 ///como corresponde. En cada caso devuelve un error explicativo.
 /// Además, verifica que la función OR no esté dentro de llaves o corchetes.
 </span><span class="kw">fn </span>expresion_escrita_correctamente(expresion: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
-    <span class="kw">let </span><span class="kw-2">mut </span>iter = expresion.chars();
+    <span class="kw">let </span>iter = expresion.chars();
     <span class="kw">let </span><span class="kw-2">mut </span>cont_llaves = <span class="number">0</span>;
     <span class="kw">let </span><span class="kw-2">mut </span>cont_corchetes = <span class="number">0</span>;
-    <span class="kw">while let </span><span class="prelude-val">Some</span>(c) = iter.next() {
+    <span class="kw">for </span>c <span class="kw">in </span>iter {
         <span class="kw">match </span>c {
             LLAVE_ABIERTA =&gt; cont_llaves += <span class="number">1</span>,
             LLAVE_CERRADA =&gt; cont_llaves -= <span class="number">1</span>,
@@ -1333,7 +1356,6 @@
     }
     <span class="prelude-val">Ok</span>(())
 }
-
 
 <span class="kw">impl </span>Regex {
 
@@ -1360,21 +1382,21 @@
                 }
                 <span class="prelude-val">Ok</span>(valida)
             }
-            <span class="prelude-val">Err</span>(error) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(error),
+            <span class="prelude-val">Err</span>(error) =&gt; <span class="prelude-val">Err</span>(error),
         }
     }
 
     <span class="doccomment">///Crea una nueva expresión regular a partir de una cadena de texto.
     /// Teniendo en cuenta si comienza con un CARET ^ o no.
-    </span><span class="kw">pub fn </span>new(expression: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, Error&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>steps: Vec&lt;PasoRegex&gt; = Vec::new();
-        <span class="kw">let </span><span class="kw-2">mut </span>chars_iter = expression.chars();
+    </span><span class="kw">pub fn </span>new(expresion: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, Error&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>pasos: Vec&lt;PasoRegex&gt; = Vec::new();
+        <span class="kw">let </span><span class="kw-2">mut </span>chars_iter = expresion.chars();
 
-        definir_uso_de_caret(expression, <span class="kw-2">&amp;mut </span>steps);
+        definir_uso_de_caret(expresion, <span class="kw-2">&amp;mut </span>pasos);
 
-        <span class="kw">let </span>steps: Vec&lt;PasoRegex&gt; = agregar_pasos(<span class="kw-2">&amp;mut </span>steps, <span class="kw-2">&amp;mut </span>chars_iter)<span class="question-mark">?</span>;
+        <span class="kw">let </span>pasos: Vec&lt;PasoRegex&gt; = agregar_pasos(<span class="kw-2">&amp;mut </span>pasos, <span class="kw-2">&amp;mut </span>chars_iter)<span class="question-mark">?</span>;
 
-        <span class="prelude-val">Ok</span>(Regex { pasos: steps })
+        <span class="prelude-val">Ok</span>(Regex { pasos })
     }
 
     <span class="doccomment">///Verifica si una expresión regular es válida para una línea de texto.
@@ -1485,9 +1507,6 @@
 }
 
 <span class="doccomment">///Realiza un backtrack en la expresión regular.
-/// - Si el paso es backtrackeable, se devuelve el tamaño del matcheo.
-/// - Si el paso no es backtrackeable, se agrega el paso a la cola de pasos.
-/// - Si no se puede hacer un backtrack, se devuelve None.
 </span><span class="kw">fn </span>backtrack(
     actual: PasoRegex,
     evaluados: <span class="kw-2">&amp;mut </span>Vec&lt;PasoEvaluado&gt;,
@@ -1508,8 +1527,7 @@
     <span class="prelude-val">None
 </span>}
 
-<span class="doccomment">///test unitarios
-</span><span class="attr">#[cfg(test)]
+<span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
