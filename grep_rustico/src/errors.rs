@@ -1,6 +1,9 @@
+
 use std::fmt;
 
 #[derive(Debug, PartialEq)]
+///Crater de errores personalizados para casos específicos.
+///Cada uno con un mensaje que le dará al usuario una idea de lo que salió mal.
 pub enum Error {
     FallaAbrirArchivo,
     FallaLecturaArchivo,

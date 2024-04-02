@@ -930,17 +930,115 @@
 <a href="#929" id="929">929</a>
 <a href="#930" id="930">930</a>
 <a href="#931" id="931">931</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::VecDeque;
+<a href="#932" id="932">932</a>
+<a href="#933" id="933">933</a>
+<a href="#934" id="934">934</a>
+<a href="#935" id="935">935</a>
+<a href="#936" id="936">936</a>
+<a href="#937" id="937">937</a>
+<a href="#938" id="938">938</a>
+<a href="#939" id="939">939</a>
+<a href="#940" id="940">940</a>
+<a href="#941" id="941">941</a>
+<a href="#942" id="942">942</a>
+<a href="#943" id="943">943</a>
+<a href="#944" id="944">944</a>
+<a href="#945" id="945">945</a>
+<a href="#946" id="946">946</a>
+<a href="#947" id="947">947</a>
+<a href="#948" id="948">948</a>
+<a href="#949" id="949">949</a>
+<a href="#950" id="950">950</a>
+<a href="#951" id="951">951</a>
+<a href="#952" id="952">952</a>
+<a href="#953" id="953">953</a>
+<a href="#954" id="954">954</a>
+<a href="#955" id="955">955</a>
+<a href="#956" id="956">956</a>
+<a href="#957" id="957">957</a>
+<a href="#958" id="958">958</a>
+<a href="#959" id="959">959</a>
+<a href="#960" id="960">960</a>
+<a href="#961" id="961">961</a>
+<a href="#962" id="962">962</a>
+<a href="#963" id="963">963</a>
+<a href="#964" id="964">964</a>
+<a href="#965" id="965">965</a>
+<a href="#966" id="966">966</a>
+<a href="#967" id="967">967</a>
+<a href="#968" id="968">968</a>
+<a href="#969" id="969">969</a>
+<a href="#970" id="970">970</a>
+<a href="#971" id="971">971</a>
+<a href="#972" id="972">972</a>
+<a href="#973" id="973">973</a>
+<a href="#974" id="974">974</a>
+<a href="#975" id="975">975</a>
+<a href="#976" id="976">976</a>
+<a href="#977" id="977">977</a>
+<a href="#978" id="978">978</a>
+<a href="#979" id="979">979</a>
+<a href="#980" id="980">980</a>
+<a href="#981" id="981">981</a>
+<a href="#982" id="982">982</a>
+<a href="#983" id="983">983</a>
+<a href="#984" id="984">984</a>
+<a href="#985" id="985">985</a>
+<a href="#986" id="986">986</a>
+<a href="#987" id="987">987</a>
+<a href="#988" id="988">988</a>
+<a href="#989" id="989">989</a>
+<a href="#990" id="990">990</a>
+<a href="#991" id="991">991</a>
+<a href="#992" id="992">992</a>
+<a href="#993" id="993">993</a>
+<a href="#994" id="994">994</a>
+<a href="#995" id="995">995</a>
+<a href="#996" id="996">996</a>
+<a href="#997" id="997">997</a>
+<a href="#998" id="998">998</a>
+<a href="#999" id="999">999</a>
+<a href="#1000" id="1000">1000</a>
+<a href="#1001" id="1001">1001</a>
+<a href="#1002" id="1002">1002</a>
+<a href="#1003" id="1003">1003</a>
+<a href="#1004" id="1004">1004</a>
+<a href="#1005" id="1005">1005</a>
+<a href="#1006" id="1006">1006</a>
+<a href="#1007" id="1007">1007</a>
+<a href="#1008" id="1008">1008</a>
+<a href="#1009" id="1009">1009</a>
+<a href="#1010" id="1010">1010</a>
+<a href="#1011" id="1011">1011</a>
+<a href="#1012" id="1012">1012</a>
+<a href="#1013" id="1013">1013</a>
+<a href="#1014" id="1014">1014</a>
+<a href="#1015" id="1015">1015</a>
+<a href="#1016" id="1016">1016</a>
+<a href="#1017" id="1017">1017</a>
+<a href="#1018" id="1018">1018</a>
+<a href="#1019" id="1019">1019</a>
+<a href="#1020" id="1020">1020</a>
+<a href="#1021" id="1021">1021</a>
+<a href="#1022" id="1022">1022</a>
+<a href="#1023" id="1023">1023</a>
+<a href="#1024" id="1024">1024</a>
+<a href="#1025" id="1025">1025</a>
+<a href="#1026" id="1026">1026</a>
+<a href="#1027" id="1027">1027</a>
+</pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::{HashSet, VecDeque};
 <span class="kw">use </span>std::str::Chars;
 
 <span class="kw">use </span><span class="kw">crate</span>::caracter::Caracter;
 <span class="kw">use </span><span class="kw">crate</span>::clase_char::ClaseChar;
 <span class="kw">use </span><span class="kw">crate</span>::errors::Error;
+<span class="kw">use </span><span class="kw">crate</span>::paso_evaluado::PasoEvaluado;
+<span class="kw">use </span><span class="kw">crate</span>::paso_regex::PasoRegex;
 <span class="kw">use </span><span class="kw">crate</span>::repeticion::Repeticion;
-<span class="kw">use </span><span class="kw">crate</span>::step_evaluado::StepEvaluado;
-<span class="kw">use </span><span class="kw">crate</span>::step_regex::StepRegex;
 
-<span class="kw">const </span>CORCHETE_ABIERTO: char = <span class="string">'['</span>;
+
+<span class="doccomment">///Caracteres especiales que se utilizan en las expresiones regulares.
+</span><span class="kw">const </span>CORCHETE_ABIERTO: char = <span class="string">'['</span>;
 <span class="kw">const </span>CORCHETE_CERRADO: char = <span class="string">']'</span>;
 <span class="kw">const </span>LLAVE_ABIERTA: char = <span class="string">'{'</span>;
 <span class="kw">const </span>LLAVE_CERRADA: char = <span class="string">'}'</span>;
@@ -954,49 +1052,54 @@
 <span class="kw">const </span>INDICADOR_CLASE: char = <span class="string">':'</span>;
 <span class="kw">const </span>SEPARADOR_RANGO: char = <span class="string">'-'</span>;
 <span class="kw">const </span>FUNCION_OR: char = <span class="string">'|'</span>;
-<span class="doccomment">///este struct representa una expresion regular
+<span class="doccomment">///Representa una expresión regular que se puede evaluar en una cadena de texto.
+/// Contiene una lista de pasos que se deben cumplir para que la expresión regular sea válida.
 </span><span class="kw">pub struct </span>Regex {
-    pasos: Vec&lt;StepRegex&gt;,
+    pasos: Vec&lt;PasoRegex&gt;,
 }
 
-<span class="kw">fn </span>obtener_auxiliar (chars_iter: <span class="kw-2">&amp;mut </span>Chars&lt;<span class="lifetime">'_</span>&gt;) -&gt; (Vec&lt;char&gt;, bool, bool) {
-    <span class="kw">let </span><span class="kw-2">mut </span>cantidad_llaves =  <span class="number">0</span>;
+
+<span class="doccomment">///Obtiene el contenido de un corchete, si es que lo hay.
+</span><span class="kw">fn </span>obtener_auxiliar(chars_iter: <span class="kw-2">&amp;mut </span>Chars&lt;<span class="lifetime">'_</span>&gt;) -&gt; (Vec&lt;char&gt;, bool, bool) {
+    <span class="kw">let </span><span class="kw-2">mut </span>cantidad_corchetes = <span class="number">1</span>;
     <span class="kw">let </span><span class="kw-2">mut </span>hay_clase = <span class="bool-val">false</span>;
     <span class="kw">let </span><span class="kw-2">mut </span>es_negado = <span class="bool-val">false</span>;
     <span class="kw">let </span><span class="kw-2">mut </span>auxiliar: Vec&lt;char&gt; = Vec::new();
-    <span class="kw">while let </span><span class="prelude-val">Some</span>(c) = chars_iter.next() {
+
+    <span class="kw">for </span>c <span class="kw">in </span>chars_iter.by_ref() {
         <span class="kw">match </span>c {
-            CORCHETE_CERRADO <span class="kw">if </span>cantidad_llaves == <span class="number">1 </span>|| c == CORCHETE_CERRADO &amp;&amp; !hay_clase =&gt; <span class="kw">break</span>,
-            CORCHETE_CERRADO =&gt; cantidad_llaves += <span class="number">1</span>,
+            CORCHETE_CERRADO <span class="kw">if </span>cantidad_corchetes == <span class="number">2 </span>|| c == CORCHETE_CERRADO &amp;&amp; !hay_clase =&gt; {
+                <span class="kw">break
+            </span>}
+            CORCHETE_CERRADO =&gt; cantidad_corchetes += <span class="number">1</span>,
             CARET =&gt; es_negado = <span class="bool-val">true</span>,
             INDICADOR_CLASE =&gt; <span class="kw">continue</span>,
             CORCHETE_ABIERTO =&gt; hay_clase = <span class="bool-val">true</span>,
             <span class="kw">_ </span>=&gt; auxiliar.push(c),
         }
     }
+
     (auxiliar, hay_clase, es_negado)
 }
 
-<span class="kw">fn </span>determinar_contenido_a_evaluar(auxiliar: Vec&lt;char&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;char&gt;, Error&gt; {
-    <span class="kw">let </span><span class="kw-2">mut </span>contenido: Vec&lt;char&gt; = Vec::new();
+<span class="doccomment">///Determina el contenido de un corchete.
+</span><span class="kw">fn </span>determinar_contenido_a_evaluar(auxiliar: Vec&lt;char&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;HashSet&lt;char&gt;, Error&gt; {
+    <span class="kw">let </span><span class="kw-2">mut </span>contenido: HashSet&lt;char&gt; = HashSet::new();
 
     <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..auxiliar.len() {
         <span class="kw">if </span>auxiliar[i] == SEPARADOR_RANGO {
             <span class="kw">if let </span>(<span class="prelude-val">Some</span>(inicio), <span class="prelude-val">Some</span>(fin)) = (auxiliar.get(i - <span class="number">1</span>), auxiliar.get(i + <span class="number">1</span>)) {
                 contenido.extend(<span class="kw-2">*</span>inicio..=<span class="kw-2">*</span>fin);
             }
-        } <span class="kw">else if </span>auxiliar[i] == <span class="string">'|' </span>{
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::CaracterNoProcesable);
-        }
-         <span class="kw">else </span>{
-            contenido.push(auxiliar[i]);
+        } <span class="kw">else </span>{
+            contenido.insert(auxiliar[i]);
         }
     }
     <span class="prelude-val">Ok</span>(contenido)
 }
 
-<span class="kw">fn </span>conseguir_lista(chars_iter: <span class="kw-2">&amp;mut </span>Chars&lt;<span class="lifetime">'_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;(ClaseChar, bool), Error&gt; {
-
+<span class="doccomment">///Obtiene la clase de caracter que se debe evaluar.
+</span><span class="kw">fn </span>conseguir_lista(chars_iter: <span class="kw-2">&amp;mut </span>Chars&lt;<span class="lifetime">'_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;(ClaseChar, bool), Error&gt; {
     <span class="kw">let </span>(auxiliar, hay_clase, es_negado) = obtener_auxiliar(chars_iter);
 
     <span class="kw">if </span>hay_clase {
@@ -1016,158 +1119,159 @@
 
     <span class="kw">let </span>contenido = determinar_contenido_a_evaluar(auxiliar);
 
-    <span class="macro">println!</span>(<span class="string">"{:?}"</span>, contenido);
-
     <span class="kw">match </span>contenido {
         <span class="prelude-val">Ok</span>(content) =&gt; <span class="prelude-val">Ok</span>((ClaseChar::Simple(content), es_negado)),
         <span class="prelude-val">Err</span>(error) =&gt; <span class="prelude-val">Err</span>(error),
     }
-
 }
 
-<span class="kw">pub fn </span>agregar_pasos(steps: <span class="kw-2">&amp;mut </span>Vec&lt;StepRegex&gt;, chars_iter: <span class="kw-2">&amp;mut </span>Chars&lt;<span class="lifetime">'_</span>&gt;,) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;StepRegex&gt;, Error&gt; {
+<span class="doccomment">///Determina si el caracter anterior es un comodín. 
+///Para verificar que la expresión regular no comience con una repetición.
+</span><span class="kw">fn </span>no_hay_anterior(anterior: <span class="kw-2">&amp;mut </span>PasoRegex) -&gt; bool {
+    anterior.caracter_interno == Caracter::Comodin
+        &amp;&amp; anterior.repeticiones == Repeticion::Alguna(<span class="bool-val">false</span>)
+}
+
+<span class="doccomment">///Agrega los pasos a la expresión regular.
+/// - Si el caracter es un punto, se agrega un paso con un comodín.
+/// - Si el caracter es un literal, se agrega un paso con el literal.
+/// - Si el caracter es una llave abierta, se obtiene el contenido de la llave y se agrega un paso con la cantidad de repeticiones
+/// y según si se trata de una repetición exacta, con solo mínimo, con solo máximo o ambas.
+/// - Si el caracter es un corchete abierto, se obtiene el contenido del corchete y se agrega un paso con la clase de caracteres.
+/// - Si el caracter es un asterisco, se agrega un paso con Alguna cantidad de repeticiones.
+/// - Si el caracter es un signo de interrogación, se agrega un paso con la cantidad de repeticiones (0 o 1 vez).
+/// - Si el caracter es un signo de más, se agrega un paso con la cantidad de repeticiones (1 o más).
+/// - Si el caracter es una barra, se obtiene el siguiente caracter y se agrega un paso con el literal.
+/// - Si el caracter es un dolar, se agrega un paso con un dolar.
+/// - Si el caracter es un caret, no se agrega un paso.
+/// - Si el caracter es una función OR, no se agrega un paso.
+/// - Si el caracter no es procesable, se devuelve un error.
+</span><span class="kw">pub fn </span>agregar_pasos(
+    steps: <span class="kw-2">&amp;mut </span>Vec&lt;PasoRegex&gt;,
+    chars_iter: <span class="kw-2">&amp;mut </span>Chars&lt;<span class="lifetime">'_</span>&gt;,
+) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;PasoRegex&gt;, Error&gt; {
     <span class="kw">while let </span><span class="prelude-val">Some</span>(c) = chars_iter.next() {
-
         <span class="kw">let </span>step = <span class="kw">match </span>c {
-
-            PUNTO =&gt; <span class="prelude-val">Some</span>(StepRegex {
+            PUNTO =&gt; <span class="prelude-val">Some</span>(PasoRegex {
                 repeticiones: Repeticion::Exacta(<span class="number">1</span>, <span class="bool-val">false</span>),
-                caracter_interno: Caracter::Wildcard,
+                caracter_interno: Caracter::Comodin,
             }),
 
-            <span class="string">'a'</span>..=<span class="string">'z' </span>| <span class="string">'A'</span>..=<span class="string">'Z' </span>| <span class="string">'0'</span>..=<span class="string">'9'  </span>=&gt; <span class="prelude-val">Some</span>(StepRegex {
-                repeticiones: Repeticion::Exacta(<span class="number">1</span>, <span class="bool-val">false</span>),
-                caracter_interno: Caracter::Literal(c),
-            }),
-
-            <span class="string">' ' </span>| <span class="string">'\t' </span>| <span class="string">'\n' </span>| <span class="string">'\r'  </span>=&gt; <span class="prelude-val">Some</span>(StepRegex {
+            <span class="string">'a'</span>..=<span class="string">'z' </span>| <span class="string">'A'</span>..=<span class="string">'Z' </span>| <span class="string">'0'</span>..=<span class="string">'9' </span>| <span class="string">' ' </span>=&gt; <span class="prelude-val">Some</span>(PasoRegex {
                 repeticiones: Repeticion::Exacta(<span class="number">1</span>, <span class="bool-val">false</span>),
                 caracter_interno: Caracter::Literal(c),
             }),
 
             LLAVE_ABIERTA =&gt; {
-
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(last) = steps.last_mut() {
-                    <span class="kw">let </span><span class="kw-2">mut </span>contenido: Vec&lt;char&gt; = Vec::new();
-                    <span class="kw">let </span><span class="kw-2">mut </span>rangos: Vec&lt;usize&gt; = Vec::new();
-                    <span class="kw">while let </span><span class="prelude-val">Some</span>(c) = chars_iter.next() {
-                        <span class="kw">if </span>c == <span class="string">',' </span>{
-                            contenido.push(c);
-                        } <span class="kw">else if </span>c == LLAVE_CERRADA {
-                            <span class="kw">break</span>;
-                        } <span class="kw">else </span>{
-                            contenido.push(c);
-                            <span class="kw">match </span>c.to_string().parse::&lt;usize&gt;() {
-                                <span class="prelude-val">Ok</span>(cant) =&gt; rangos.push(cant),
-                                <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(Error::CaracterNoProcesable),
+                    <span class="kw">if </span>no_hay_anterior(last) {
+                        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::CaracterNoProcesable);
+                    } <span class="kw">else if let </span><span class="prelude-val">Some</span>(last) = steps.last_mut() {
+                        <span class="kw">let </span><span class="kw-2">mut </span>contenido: Vec&lt;char&gt; = Vec::new();
+                        <span class="kw">let </span><span class="kw-2">mut </span>rangos: Vec&lt;usize&gt; = Vec::new();
+                        <span class="kw">for </span>c <span class="kw">in </span>chars_iter.by_ref() {
+                            <span class="kw">if </span>c == <span class="string">',' </span>{
+                                contenido.push(c);
+                            } <span class="kw">else if </span>c == LLAVE_CERRADA {
+                                <span class="kw">break</span>;
+                            } <span class="kw">else </span>{
+                                contenido.push(c);
+                                <span class="kw">match </span>c.to_string().parse::&lt;usize&gt;() {
+                                    <span class="prelude-val">Ok</span>(cant) =&gt; rangos.push(cant),
+                                    <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(Error::ErrorEnLlaves),
+                                }
                             }
                         }
-                    }
 
-                    <span class="kw">if </span>contenido.len() &gt;= <span class="number">2 </span>{
-                        <span class="kw">if </span>contenido[<span class="number">0</span>] == <span class="string">',' </span>{
-                            last.repeticiones = Repeticion::Rango {
-                                min: <span class="prelude-val">None</span>,
-                                max: <span class="prelude-val">Some</span>(rangos[<span class="number">0</span>]),
-                            };
-                        } <span class="kw">else if </span>contenido[contenido.len() - <span class="number">1</span>] == <span class="string">',' </span>{
-                            last.repeticiones = Repeticion::Rango {
-                                min: <span class="prelude-val">Some</span>(rangos[<span class="number">0</span>]),
-                                max: <span class="prelude-val">None</span>,
-                            };
+                        <span class="kw">if </span>contenido.len() &gt;= <span class="number">2 </span>{
+                            <span class="kw">if </span>contenido[<span class="number">0</span>] == <span class="string">',' </span>{
+                                last.repeticiones = Repeticion::Rango {
+                                    min: <span class="prelude-val">None</span>,
+                                    max: <span class="prelude-val">Some</span>(rangos[<span class="number">0</span>]),
+                                };
+                            } <span class="kw">else if </span>contenido[contenido.len() - <span class="number">1</span>] == <span class="string">',' </span>{
+                                last.repeticiones = Repeticion::Rango {
+                                    min: <span class="prelude-val">Some</span>(rangos[<span class="number">0</span>]),
+                                    max: <span class="prelude-val">None</span>,
+                                };
+                            } <span class="kw">else </span>{
+                                last.repeticiones = Repeticion::Rango {
+                                    min: <span class="prelude-val">Some</span>(rangos[<span class="number">0</span>]),
+                                    max: <span class="prelude-val">Some</span>(rangos[<span class="number">1</span>]),
+                                };
+                            }
+                        } <span class="kw">else if </span>contenido.len() == <span class="number">1 </span>&amp;&amp; contenido[<span class="number">0</span>].is_ascii_digit() {
+                            last.repeticiones = Repeticion::Exacta(rangos[<span class="number">0</span>], <span class="bool-val">false</span>);
                         } <span class="kw">else </span>{
-                            last.repeticiones = Repeticion::Rango {
-                                min: <span class="prelude-val">Some</span>(rangos[<span class="number">0</span>]),
-                                max: <span class="prelude-val">Some</span>(rangos[<span class="number">1</span>]),
-                            };
+                            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::ErrorEnLlaves);
                         }
-                    } <span class="kw">else if </span>contenido.len() == <span class="number">1 </span>&amp;&amp; contenido[<span class="number">0</span>].is_ascii_digit() {
-                        last.repeticiones = Repeticion::Exacta(rangos[<span class="number">0</span>], <span class="bool-val">false</span>);
-                    } <span class="kw">else </span>{
-                        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::CaracterNoProcesable);
                     }
                 }
+
                 <span class="prelude-val">None
             </span>}
 
-            CORCHETE_ABIERTO =&gt; {
-
-                <span class="kw">match </span>conseguir_lista(chars_iter) {
-                    <span class="prelude-val">Ok</span>(contenido) =&gt; <span class="prelude-val">Some</span>(StepRegex {
-                        repeticiones: Repeticion::Exacta(<span class="number">1</span>, contenido.<span class="number">1</span>),
-                        caracter_interno: Caracter::Lista(contenido.<span class="number">0</span>),
-                    }),
-                    <span class="prelude-val">Err</span>(error) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(error)
-                }
-            }
+            CORCHETE_ABIERTO =&gt; <span class="kw">match </span>conseguir_lista(chars_iter) {
+                <span class="prelude-val">Ok</span>(contenido) =&gt; <span class="prelude-val">Some</span>(PasoRegex {
+                    repeticiones: Repeticion::Exacta(<span class="number">1</span>, contenido.<span class="number">1</span>),
+                    caracter_interno: Caracter::Serie(contenido.<span class="number">0</span>),
+                }),
+                <span class="prelude-val">Err</span>(error) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(error),
+            },
 
             INTERROGACION =&gt; {
-
-                <span class="kw">match </span>steps.last_mut() {
-                    <span class="prelude-val">Some</span>(last) =&gt; {
-                        <span class="kw">if </span>last.caracter_interno == Caracter::Wildcard &amp;&amp; last.repeticiones == Repeticion::Alguna(<span class="bool-val">false</span>) {
-                            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::CaracterNoProcesable);
-                        } <span class="kw">else </span>{
-                            last.repeticiones = Repeticion::Rango {
-                                min: <span class="prelude-val">Some</span>(<span class="number">0</span>),
-                                max: <span class="prelude-val">Some</span>(<span class="number">1</span>),
-                            };
-                        }
-                    },
-                    <span class="prelude-val">None </span>=&gt; {},
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(last) = steps.last_mut() {
+                    <span class="kw">if </span>no_hay_anterior(last) {
+                        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::ErrorEnRepeticion);
+                    } <span class="kw">else </span>{
+                        last.repeticiones = Repeticion::Rango {
+                            min: <span class="prelude-val">Some</span>(<span class="number">0</span>),
+                            max: <span class="prelude-val">Some</span>(<span class="number">1</span>),
+                        };
+                    }
                 }
                 <span class="prelude-val">None
             </span>}
 
             ASTERISCO =&gt; {
-
-                <span class="kw">match </span>steps.last_mut() {
-                    <span class="prelude-val">Some</span>(last) =&gt; {
-                        <span class="kw">if </span>last.caracter_interno == Caracter::Wildcard &amp;&amp; last.repeticiones == Repeticion::Alguna(<span class="bool-val">false</span>) {
-                            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::CaracterNoProcesable);
-                        } <span class="kw">else </span>{
-                            <span class="kw">match </span>conseguir_lista(chars_iter) {
-                                <span class="prelude-val">Ok</span>((<span class="kw">_</span>, negado)) =&gt; last.repeticiones = Repeticion::Alguna(negado),
-                                <span class="prelude-val">Err</span>(error) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(error),
-                            };
-                        }
-                    },
-                    <span class="prelude-val">None </span>=&gt; {},
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(last) = steps.last_mut() {
+                    <span class="kw">if </span>no_hay_anterior(last) {
+                        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::ErrorEnRepeticion);
+                    } <span class="kw">else </span>{
+                        <span class="kw">match </span>conseguir_lista(chars_iter) {
+                            <span class="prelude-val">Ok</span>((<span class="kw">_</span>, negado)) =&gt; last.repeticiones = Repeticion::Alguna(negado),
+                            <span class="prelude-val">Err</span>(error) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(error),
+                        };
+                    }
                 }
                 <span class="prelude-val">None
             </span>}
 
             MAS =&gt; {
-
-                <span class="kw">match </span>steps.last_mut() {
-                    <span class="prelude-val">Some</span>(last) =&gt; {
-                        <span class="kw">if </span>last.caracter_interno == Caracter::Wildcard &amp;&amp; last.repeticiones == Repeticion::Alguna(<span class="bool-val">false</span>) {
-                            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::CaracterNoProcesable);
-                        } <span class="kw">else </span>{
-                            last.repeticiones = Repeticion::Rango {
-                                min: <span class="prelude-val">Some</span>(<span class="number">1</span>),
-                                max: <span class="prelude-val">None</span>,
-                            };
-                        }
-                    },
-                    <span class="prelude-val">None </span>=&gt; {},
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(last) = steps.last_mut() {
+                    <span class="kw">if </span>no_hay_anterior(last) {
+                        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::ErrorEnRepeticion);
+                    } <span class="kw">else </span>{
+                        last.repeticiones = Repeticion::Rango {
+                            min: <span class="prelude-val">Some</span>(<span class="number">1</span>),
+                            max: <span class="prelude-val">None</span>,
+                        };
+                    }
                 }
                 <span class="prelude-val">None
-
             </span>}
 
             BARRA =&gt; <span class="kw">match </span>chars_iter.next() {
-
-                <span class="prelude-val">Some</span>(literal) =&gt; <span class="prelude-val">Some</span>(StepRegex {
+                <span class="prelude-val">Some</span>(literal) =&gt; <span class="prelude-val">Some</span>(PasoRegex {
                     repeticiones: Repeticion::Exacta(<span class="number">1</span>, <span class="bool-val">false</span>),
                     caracter_interno: Caracter::Literal(literal),
                 }),
                 <span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(Error::CaracterNoProcesable),
             },
 
-            DOLAR =&gt; <span class="prelude-val">Some</span>(StepRegex {
+            DOLAR =&gt; <span class="prelude-val">Some</span>(PasoRegex {
                 repeticiones: Repeticion::Exacta(<span class="number">1</span>, <span class="bool-val">false</span>),
-                caracter_interno: Caracter::Dollar,
+                caracter_interno: Caracter::Dolar,
             }),
 
             CARET =&gt; <span class="prelude-val">None</span>,
@@ -1185,67 +1289,114 @@
     <span class="prelude-val">Ok</span>(steps.to_vec())
 }
 
-<span class="kw">fn </span>definir_uso_de_caret(expression: <span class="kw-2">&amp;</span>str, steps: <span class="kw-2">&amp;mut </span>Vec&lt;StepRegex&gt;) {
-    
+<span class="doccomment">///Determina si se debe agregar un paso con un comodín al principio de la expresión regular
+///(como un .*), si esta no comienza con un CARET ^.
+</span><span class="kw">fn </span>definir_uso_de_caret(expression: <span class="kw-2">&amp;</span>str, steps: <span class="kw-2">&amp;mut </span>Vec&lt;PasoRegex&gt;) {
     <span class="kw">if </span>!expression.starts_with(CARET) {
-        <span class="kw">let </span>paso = <span class="prelude-val">Some</span>(StepRegex {
+        <span class="kw">let </span>paso = <span class="prelude-val">Some</span>(PasoRegex {
             repeticiones: Repeticion::Alguna(<span class="bool-val">false</span>),
-            caracter_interno: Caracter::Wildcard,
+            caracter_interno: Caracter::Comodin,
         });
         <span class="kw">if let </span><span class="prelude-val">Some</span>(p) = paso {
             steps.push(p);
         }
-    }  
+    }
 }
+
+<span class="doccomment">///Verifica si la expresión regular está escrita correctamente.
+///Determina si las llaves y los corchetes se abren y se cierran
+///como corresponde. En cada caso devuelve un error explicativo.
+/// Además, verifica que la función OR no esté dentro de llaves o corchetes.
+</span><span class="kw">fn </span>expresion_escrita_correctamente(expresion: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
+    <span class="kw">let </span><span class="kw-2">mut </span>iter = expresion.chars();
+    <span class="kw">let </span><span class="kw-2">mut </span>cont_llaves = <span class="number">0</span>;
+    <span class="kw">let </span><span class="kw-2">mut </span>cont_corchetes = <span class="number">0</span>;
+    <span class="kw">while let </span><span class="prelude-val">Some</span>(c) = iter.next() {
+        <span class="kw">match </span>c {
+            LLAVE_ABIERTA =&gt; cont_llaves += <span class="number">1</span>,
+            LLAVE_CERRADA =&gt; cont_llaves -= <span class="number">1</span>,
+            CORCHETE_ABIERTO =&gt; cont_corchetes += <span class="number">1</span>,
+            CORCHETE_CERRADO =&gt; cont_corchetes -= <span class="number">1</span>,
+            FUNCION_OR =&gt; {
+                <span class="kw">if </span>cont_llaves != <span class="number">0 </span>|| cont_corchetes != <span class="number">0 </span>{
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::ErrorEnFuncionOR);
+                }
+            }
+            <span class="kw">_ </span>=&gt; {}
+        }
+    }
+    <span class="kw">if </span>cont_llaves != <span class="number">0 </span>{
+        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::ErrorEnLlaves);
+    }
+    <span class="kw">if </span>cont_corchetes != <span class="number">0 </span>{
+        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::ErrorEnCorchetes);
+    }
+    <span class="prelude-val">Ok</span>(())
+}
+
 
 <span class="kw">impl </span>Regex {
 
-    <span class="kw">pub fn </span>es_valida_general(expression: <span class="kw-2">&amp;</span>str,  linea: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;bool, Error&gt; {
-        <span class="kw">let </span>expresiones_a_evaluar: Vec&lt;<span class="kw-2">&amp;</span>str&gt; = expression.split(<span class="string">'|'</span>).collect();
-        <span class="kw">let </span><span class="kw-2">mut </span>coincidencia = <span class="bool-val">false</span>;
+    <span class="doccomment">///Verifica si una expresión regular es válida para una línea de texto.
+    /// - Si la expresión regular está escrita correctamente, se evalúa si la línea cumple con la expresión regular.
+    /// En caso de tener una función OR, se evalúa si alguna de las expresiones es válida.
+    /// - Si la expresión regular no está escrita correctamente, se devuelve un error.
+    </span><span class="kw">pub fn </span>es_valida_general(expresion_completa: <span class="kw-2">&amp;</span>str, linea: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;bool, Error&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>valida = <span class="bool-val">false</span>;
 
-        <span class="kw">for </span>exp <span class="kw">in </span>expresiones_a_evaluar {
-            <span class="kw">let </span>regex = <span class="kw">match </span>Regex::new(exp){
-                <span class="prelude-val">Ok</span>(regex) =&gt; regex,
-                <span class="prelude-val">Err</span>(err) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(err),
-            };
-            <span class="kw">if </span>regex.es_valida(linea)<span class="question-mark">? </span>{
-                coincidencia = <span class="bool-val">true</span>;
-                <span class="kw">break</span>;
+        <span class="kw">match </span>expresion_escrita_correctamente(expresion_completa) {
+            <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; {
+                <span class="kw">let </span>expresiones_a_evaluar: Vec&lt;<span class="kw-2">&amp;</span>str&gt; = expresion_completa.split(<span class="string">'|'</span>).collect();
+
+                <span class="kw">for </span>exp <span class="kw">in </span>expresiones_a_evaluar {
+                    <span class="kw">let </span>regex = <span class="kw">match </span>Regex::new(exp) {
+                        <span class="prelude-val">Ok</span>(regex) =&gt; regex,
+                        <span class="prelude-val">Err</span>(err) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(err),
+                    };
+                    <span class="kw">if </span>regex.es_valida(linea)<span class="question-mark">? </span>{
+                        valida = <span class="bool-val">true</span>;
+                        <span class="kw">break</span>;
+                    }
+                }
+                <span class="prelude-val">Ok</span>(valida)
             }
-           
+            <span class="prelude-val">Err</span>(error) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(error),
         }
-        <span class="prelude-val">Ok</span>(coincidencia)
     }
 
-    <span class="kw">pub fn </span>new(expression: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, Error&gt; {
-
-        <span class="kw">let </span><span class="kw-2">mut </span>steps: Vec&lt;StepRegex&gt; = Vec::new();
+    <span class="doccomment">///Crea una nueva expresión regular a partir de una cadena de texto.
+    /// Teniendo en cuenta si comienza con un CARET ^ o no.
+    </span><span class="kw">pub fn </span>new(expression: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, Error&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>steps: Vec&lt;PasoRegex&gt; = Vec::new();
         <span class="kw">let </span><span class="kw-2">mut </span>chars_iter = expression.chars();
 
         definir_uso_de_caret(expression, <span class="kw-2">&amp;mut </span>steps);
 
-        <span class="kw">let </span>steps: Vec&lt;StepRegex&gt; = agregar_pasos(<span class="kw-2">&amp;mut </span>steps, <span class="kw-2">&amp;mut </span>chars_iter)<span class="question-mark">?</span>;
+        <span class="kw">let </span>steps: Vec&lt;PasoRegex&gt; = agregar_pasos(<span class="kw-2">&amp;mut </span>steps, <span class="kw-2">&amp;mut </span>chars_iter)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(Regex { pasos: steps })
     }
 
-    <span class="kw">pub fn </span>es_valida(<span class="self">self</span>, linea: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;bool, Error&gt; {
+    <span class="doccomment">///Verifica si una expresión regular es válida para una línea de texto.
+    ///es el "validador" de la expresión regular.
+    /// Según el tipo de repetición, se busca en la línea de texto la
+    /// coincidencia. Si no se encuentra, se evalúa si se puede hacer un backtrack.
+    </span><span class="kw">pub fn </span>es_valida(<span class="self">self</span>, linea: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;bool, Error&gt; {
         <span class="kw">if </span>!linea.is_ascii() {
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::FormatoDeLineaNoASCII);
         }
-        <span class="kw">let </span><span class="kw-2">mut </span>queue: VecDeque&lt;StepRegex&gt; = VecDeque::from(<span class="self">self</span>.pasos);
-        <span class="kw">let </span><span class="kw-2">mut </span>stack: Vec&lt;StepEvaluado&gt; = Vec::new();
+        <span class="kw">let </span><span class="kw-2">mut </span>cola: VecDeque&lt;PasoRegex&gt; = VecDeque::from(<span class="self">self</span>.pasos);
+        <span class="kw">let </span><span class="kw-2">mut </span>pila: Vec&lt;PasoEvaluado&gt; = Vec::new();
         <span class="kw">let </span><span class="kw-2">mut </span>index = <span class="number">0</span>;
 
-        <span class="lifetime">'pasos</span>: <span class="kw">while let </span><span class="prelude-val">Some</span>(<span class="kw-2">mut </span>paso) = queue.pop_front() {
+        <span class="lifetime">'pasos</span>: <span class="kw">while let </span><span class="prelude-val">Some</span>(paso) = cola.pop_front() {
             <span class="kw">match </span>paso.repeticiones {
                 Repeticion::Exacta(n, negacion) =&gt; {
-                    <span class="kw">let </span><span class="kw-2">mut </span>match_size = <span class="number">0</span>;
+                    <span class="kw">let </span><span class="kw-2">mut </span>tam_coincidencia = <span class="number">0</span>;
                     <span class="kw">for _ in </span><span class="number">0</span>..n {
                         <span class="kw">let </span>avance = paso.caracter_interno.coincide(<span class="kw-2">&amp;</span>linea[index..]);
                         <span class="kw">if </span>avance == <span class="number">0 </span>{
-                            <span class="kw">match </span>backtrack(paso, <span class="kw-2">&amp;mut </span>stack, <span class="kw-2">&amp;mut </span>queue) {
+                            <span class="kw">match </span>backtrack(paso, <span class="kw-2">&amp;mut </span>pila, <span class="kw-2">&amp;mut </span>cola) {
                                 <span class="prelude-val">Some</span>(size) =&gt; {
                                     index -= size;
                                     <span class="kw">continue </span><span class="lifetime">'pasos</span>;
@@ -1259,15 +1410,15 @@
                                 }
                             }
                         } <span class="kw">else </span>{
-                            match_size += avance;
+                            tam_coincidencia += avance;
                             index += avance;
                         }
                     }
 
-                    stack.push(StepEvaluado {
-                        paso: paso,
-                        match_size: match_size,
-                        backtrackable: <span class="bool-val">false</span>,
+                    pila.push(PasoEvaluado {
+                        paso,
+                        tam_matcheo: tam_coincidencia,
+                        backtrackeable: <span class="bool-val">false</span>,
                     });
                     <span class="kw">if </span>negacion {
                         <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="bool-val">false</span>);
@@ -1276,15 +1427,14 @@
                 Repeticion::Alguna(negacion) =&gt; {
                     <span class="kw">let </span><span class="kw-2">mut </span>sigo_avanzando = <span class="bool-val">true</span>;
                     <span class="kw">while </span>sigo_avanzando {
-                        <span class="comment">//println!("paso: {:?}", paso.caracter_interno);
-                        </span><span class="kw">let </span>avance = paso.caracter_interno.coincide(<span class="kw-2">&amp;</span>linea[index..]);
+                        <span class="kw">let </span>avance = paso.caracter_interno.coincide(<span class="kw-2">&amp;</span>linea[index..]);
 
                         <span class="kw">if </span>avance != <span class="number">0 </span>{
                             index += avance;
-                            stack.push(StepEvaluado {
+                            pila.push(PasoEvaluado {
                                 paso: paso.clone(),
-                                match_size: avance,
-                                backtrackable: <span class="bool-val">true</span>,
+                                tam_matcheo: avance,
+                                backtrackeable: <span class="bool-val">true</span>,
                             })
                         } <span class="kw">else </span>{
                             sigo_avanzando = <span class="bool-val">false</span>;
@@ -1295,38 +1445,29 @@
                     }
                 }
                 Repeticion::Rango { min, max } =&gt; {
-                    <span class="kw">let </span>min = <span class="kw">match </span>min {
-                        <span class="prelude-val">Some</span>(min) =&gt; min,
-                        <span class="prelude-val">None </span>=&gt; <span class="number">0</span>,
-                    };
+                    <span class="kw">let </span>min = min.unwrap_or(<span class="number">0</span>);
 
                     <span class="kw">let </span>max = <span class="kw">match </span>max {
                         <span class="prelude-val">Some</span>(max) =&gt; max,
                         <span class="prelude-val">None </span>=&gt; linea.len() - index,
                     };
-                    <span class="kw">let </span><span class="kw-2">mut </span>aux: Vec&lt;StepEvaluado&gt; = Vec::new();
+                    <span class="kw">let </span><span class="kw-2">mut </span>aux: Vec&lt;PasoEvaluado&gt; = Vec::new();
 
                     <span class="kw">let </span><span class="kw-2">mut </span>sigo_avanzando = <span class="bool-val">true</span>;
                     <span class="kw">while </span>sigo_avanzando {
-                        <span class="kw">if </span><span class="macro">matches!</span>(paso.caracter_interno, Caracter::Lista(<span class="kw">_</span>)) {
-                            paso.caracter_interno =
-                                Caracter::Literal(linea.as_bytes()[index] <span class="kw">as </span>char);
-                            <span class="comment">//println!("nuevo paso: {:?}", paso.caracter_interno)
-                        </span>}
-
                         <span class="kw">let </span>avance = paso.caracter_interno.coincide(<span class="kw-2">&amp;</span>linea[index..]);
 
                         <span class="kw">if </span>avance != <span class="number">0 </span>{
                             index += avance;
-                            aux.push(StepEvaluado {
+                            aux.push(PasoEvaluado {
                                 paso: paso.clone(),
-                                match_size: avance,
-                                backtrackable: <span class="bool-val">true</span>,
+                                tam_matcheo: avance,
+                                backtrackeable: <span class="bool-val">true</span>,
                             });
-                            stack.push(StepEvaluado {
+                            pila.push(PasoEvaluado {
                                 paso: paso.clone(),
-                                match_size: avance,
-                                backtrackable: <span class="bool-val">true</span>,
+                                tam_matcheo: avance,
+                                backtrackeable: <span class="bool-val">true</span>,
                             })
                         } <span class="kw">else </span>{
                             sigo_avanzando = <span class="bool-val">false</span>;
@@ -1343,22 +1484,32 @@
     }
 }
 
-<span class="kw">fn </span>backtrack(current: StepRegex, evaluated: <span class="kw-2">&amp;mut </span>Vec&lt;StepEvaluado&gt;, next: <span class="kw-2">&amp;mut </span>VecDeque&lt;StepRegex&gt;,) -&gt; <span class="prelude-ty">Option</span>&lt;usize&gt; {
+<span class="doccomment">///Realiza un backtrack en la expresión regular.
+/// - Si el paso es backtrackeable, se devuelve el tamaño del matcheo.
+/// - Si el paso no es backtrackeable, se agrega el paso a la cola de pasos.
+/// - Si no se puede hacer un backtrack, se devuelve None.
+</span><span class="kw">fn </span>backtrack(
+    actual: PasoRegex,
+    evaluados: <span class="kw-2">&amp;mut </span>Vec&lt;PasoEvaluado&gt;,
+    siguiente: <span class="kw-2">&amp;mut </span>VecDeque&lt;PasoRegex&gt;,
+) -&gt; <span class="prelude-ty">Option</span>&lt;usize&gt; {
     <span class="kw">let </span><span class="kw-2">mut </span>back_size = <span class="number">0</span>;
-    next.push_front(current);
-    <span class="kw">while let </span><span class="prelude-val">Some</span>(e) = evaluated.pop() {
-        back_size += e.match_size;
-        <span class="kw">if </span>e.backtrackable {
-            <span class="comment">//println!("backtrack {}", back_size);
-            </span><span class="kw">return </span><span class="prelude-val">Some</span>(back_size);
+
+    siguiente.push_front(actual);
+
+    <span class="kw">while let </span><span class="prelude-val">Some</span>(paso_ev) = evaluados.pop() {
+        back_size += paso_ev.tam_matcheo;
+        <span class="kw">if </span>paso_ev.backtrackeable {
+            <span class="kw">return </span><span class="prelude-val">Some</span>(back_size);
         } <span class="kw">else </span>{
-            next.push_front(e.paso);
+            siguiente.push_front(paso_ev.paso);
         }
     }
     <span class="prelude-val">None
 </span>}
 
-<span class="attr">#[cfg(test)]
+<span class="doccomment">///test unitarios
+</span><span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
@@ -1370,495 +1521,536 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test02_literales() {
+        <span class="kw">let </span>regex = Regex::new(<span class="string">"^abcd"</span>);
+        <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"abcdefg"</span>).unwrap(), <span class="bool-val">true</span>);
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test03_literales() {
+        <span class="kw">let </span>regex = Regex::new(<span class="string">"^abcd"</span>);
+        <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"ab abcdefg"</span>).unwrap(), <span class="bool-val">false</span>);
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test04_literales() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"abcd"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"efgabcd"</span>).unwrap(), <span class="bool-val">true</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test03_literales() {
+    </span><span class="kw">fn </span>test05_literales() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"abcd"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"abcefg"</span>).unwrap(), <span class="bool-val">false</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test04_punto() {
+    </span><span class="kw">fn </span>test06_punto() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ab.cd"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"ab0cd"</span>).unwrap(), <span class="bool-val">true</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test05_punto() {
+    </span><span class="kw">fn </span>test07_punto() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ab.cd"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"abcd"</span>).unwrap(), <span class="bool-val">false</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test06_punto_asterisco() {
+    </span><span class="kw">fn </span>test08_regex_con_asterisk() {
+        <span class="kw">let </span>regex = Regex::new(<span class="string">"ab*c"</span>);
+        <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"abbbbbbcd"</span>).unwrap(), <span class="bool-val">true</span>);
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test08_punto_asterisco() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ab.*cd"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"abcd"</span>).unwrap(), <span class="bool-val">true</span>);
     }
-    
+
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test07_punto_asterisco() {
+    </span><span class="kw">fn </span>test09_punto_asterisco() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ab.*cd"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"abaaaaaacd"</span>).unwrap(), <span class="bool-val">true</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test08_corchete() {
+    </span><span class="kw">fn </span>test10_corchete() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"a[bc]d"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"abd"</span>).unwrap(), <span class="bool-val">true</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test09_corchete() {
+    </span><span class="kw">fn </span>test11_corchete() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"a[bc]d"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"acd"</span>).unwrap(), <span class="bool-val">true</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test10_corchete() {
+    </span><span class="kw">fn </span>test12_corchete() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"a[bc]d"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"afd"</span>).unwrap(), <span class="bool-val">false</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test11_corchete_invalido() {
-        <span class="kw">let </span>regex = Regex::new(<span class="string">"a[b|c]d"</span>);
-        <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"afd"</span>).unwrap_err(), Error::CaracterNoProcesable);
-    }
-
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>test01_regex_con_literales() {
-        <span class="kw">let </span>regex = Regex::new(<span class="string">"^abc"</span>);
-        <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"abcdefg"</span>).unwrap(), <span class="bool-val">true</span>);
-    }
-
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>test02_regex_con_comodin() {
-        <span class="kw">let </span>regex = Regex::new(<span class="string">"ab.c"</span>);
-        <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"ahahahabacdefg"</span>).unwrap(), <span class="bool-val">true</span>);
-    }
-
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>test03_regex_con_asterisk() {
-        <span class="kw">let </span>regex = Regex::new(<span class="string">"ab*c"</span>);
-        <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"abbbbbbc"</span>).unwrap(), <span class="bool-val">true</span>);
-    }
-
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>test04_regex_con_asterisk02() {
-        <span class="kw">let </span>regex = Regex::new(<span class="string">"^ab*c"</span>);
-        <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"fdf ac"</span>).unwrap(), <span class="bool-val">false</span>);
-    }
-
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>test05_regex_con_metacaracter_con_backlash() {
+    </span><span class="kw">fn </span>test13_barra() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"a\\*"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"a*cds"</span>).unwrap(), <span class="bool-val">true</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test06_regex_con_plus() {
+    </span><span class="kw">fn </span>test14_mas() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"hola+"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"holaa"</span>).unwrap(), <span class="bool-val">true</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test07_regex_con_plus() {
+    </span><span class="kw">fn </span>test15_mas() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"hola+"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hol"</span>).unwrap(), <span class="bool-val">false</span>);
     }
 
-     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test07_regex_con_question() {
-        <span class="kw">let </span>regex = Regex::new(<span class="string">"hola?f"</span>);
-        <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"holaf"</span>).unwrap(), <span class="bool-val">true</span>);
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test16_interrogacion() {
+        <span class="kw">let </span>regex = Regex::new(<span class="string">"holi?s"</span>);
+        <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"holis"</span>).unwrap(), <span class="bool-val">true</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test08_regex_con_question2() {
-        <span class="kw">let </span>regex = Regex::new(<span class="string">"hola?s"</span>);
+    </span><span class="kw">fn </span>test17_interrogacion() {
+        <span class="kw">let </span>regex = Regex::new(<span class="string">"holi?s"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hols"</span>).unwrap(), <span class="bool-val">true</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test09_regex_con_question3() {
+    </span><span class="kw">fn </span>test18_interrogacion() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"hola?"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"holaaaaa"</span>).unwrap(), <span class="bool-val">false</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test10_regex_con_bracket_exacto() {
+    </span><span class="kw">fn </span>test19_llave_exacto() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"a{2}"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"a"</span>).unwrap(), <span class="bool-val">false</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test11_regex_con_bracket_exacto_() {
+    </span><span class="kw">fn </span>test20_llave_exacto() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ba{2}"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"baa"</span>).unwrap(), <span class="bool-val">true</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test12_regex_con_bracket_exacto_() {
+    </span><span class="kw">fn </span>test21_llave_exacto() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ba{2}c"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"bac"</span>).unwrap(), <span class="bool-val">false</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test13_regex_con_bracket_con_minimo_() {
+    </span><span class="kw">fn </span>test22_llave_minimo() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ba{2,}c"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"baaaac"</span>).unwrap(), <span class="bool-val">true</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test14_regex_con_bracket_con_minimo_() {
+    </span><span class="kw">fn </span>test23_llave_minimo() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ba{2,}c"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"bac"</span>).unwrap(), <span class="bool-val">false</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test15_regex_con_bracket_con_rango_() {
+    </span><span class="kw">fn </span>test24_llave_rango() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ba{5,8}c"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"baaaaac"</span>).unwrap(), <span class="bool-val">true</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test16_regex_con_bracket_con_rango_() {
+    </span><span class="kw">fn </span>test25_llave_rango() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ba{5,8}c"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"baaaac"</span>).unwrap(), <span class="bool-val">false</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test17_regex_con_bracket_con_rango_() {
+    </span><span class="kw">fn </span>test26_llave_rango() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ba{5,8}c"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"baaaaaaaaac"</span>).unwrap(), <span class="bool-val">false</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test18_regex_con_bracket_con_maximo1_() {
+    </span><span class="kw">fn </span>test27_llave_maximo() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ba{,8}c"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"baaaaaac"</span>).unwrap(), <span class="bool-val">true</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test19_regex_con_bracket_con_maximo2_() {
+    </span><span class="kw">fn </span>test28_llave_maximo() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ba{,8}c"</span>);
         <span class="macro">assert_eq!</span>(
             regex.unwrap().es_valida(<span class="string">"baaaaaaaaaaaaaaaac"</span>).unwrap(),
             <span class="bool-val">false
         </span>);
     }
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>test20_regex_combinado() {
-        <span class="kw">let </span>regex = Regex::new(<span class="string">"ba{5,8}.c"</span>);
-        <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"baaaaaaafc"</span>).unwrap(), <span class="bool-val">true</span>);
-    }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test21_regex_bracket_literal_01() {
+    </span><span class="kw">fn </span>test29_corchete_literal() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ho[lmn]a"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hola"</span>).unwrap(), <span class="bool-val">true</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test22_regex_bracket_literal_02() {
+    </span><span class="kw">fn </span>test30_corchete_literal() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ho[lmn]a"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hoka"</span>).unwrap(), <span class="bool-val">false</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test23_regex_bracket_rango_01() {
+    </span><span class="kw">fn </span>test31_corchete_rango() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ho[i-m]a"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hola"</span>).unwrap(), <span class="bool-val">true</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test24_regex_bracket_rango_02() {
+    </span><span class="kw">fn </span>test32_corchete_rango() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ho[i-m]a"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hosa"</span>).unwrap(), <span class="bool-val">false</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test25_regex_combinado() {
-        <span class="kw">let </span>regex = Regex::new(<span class="string">"ho[k-o]a.p{2,4}"</span>);
-        <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hola3ppp"</span>).unwrap(), <span class="bool-val">true</span>);
-    }
-
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>test26_regex_bracket_rango_03() {
+    </span><span class="kw">fn </span>test33_corchete_rango() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ho[a-dA-Cx-z]"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hoAa"</span>).unwrap(), <span class="bool-val">true</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test27_regex_bracket_rango_04() {
+    </span><span class="kw">fn </span>test34_corchete_rango() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ho[a-dA-Cx-z]"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hoXa"</span>).unwrap(), <span class="bool-val">false</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test28_regex_bracket_rango_05_negado() {
+    </span><span class="kw">fn </span>test35_corchete_rango_negado() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ho[^a-dA-Cx-z]"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hoXa"</span>).unwrap(), <span class="bool-val">true</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test29_regex_bracket_rango_06_negado() {
+    </span><span class="kw">fn </span>test36_corchete_rango_negado() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ho[^a-dA-Cx-z]"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hoxa"</span>).unwrap(), <span class="bool-val">false</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test30_regex_combinado_bracket_question01() {
+    </span><span class="kw">fn </span>test37_corchete_interrogacion() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ho[a-dA-Cx-z]?a"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hoddda"</span>).unwrap(), <span class="bool-val">false</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test31_regex_combinado_bracket_question02() {
+    </span><span class="kw">fn </span>test38_corchete_interrogacion() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ho[a-dA-Cx-z]?a"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hoa"</span>).unwrap(), <span class="bool-val">true</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test32_regex_combinado_bracket_question03() {
-        <span class="kw">let </span>regex = Regex::new(<span class="string">"ho[a-dA-Cx-z]?a"</span>);
-        <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hoda"</span>).unwrap(), <span class="bool-val">true</span>);
+    </span><span class="kw">fn </span>test39_corchete_interrogacion() {
+        <span class="kw">let </span>regex = Regex::new(<span class="string">"ho[d-g]?a"</span>);
+        <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hoea"</span>).unwrap(), <span class="bool-val">true</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test33_regex_combinado_bracket_plus01() {
+    </span><span class="kw">fn </span>test40_corchete_mas() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ho[a-dA-Cx-z]+a"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hoE"</span>).unwrap(), <span class="bool-val">false</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test34_regex_combinado_bracket_plus02() {
+    </span><span class="kw">fn </span>test41_corchete_mas() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ho[a-dA-Cx-z]+a"</span>);
-        <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hoaE"</span>).unwrap(), <span class="bool-val">true</span>);
+        <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hoAAAAAa"</span>).unwrap(), <span class="bool-val">true</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test35_regex_combinado_bracket_plus03() {
+    </span><span class="kw">fn </span>test42_corchete_mas() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ho[a-dA-Cx-z]+a"</span>);
-        <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hoaaaaaaaaaaaaaaaaaE"</span>).unwrap(), <span class="bool-val">true</span>);
+        <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hoxxxAAAAa"</span>).unwrap(), <span class="bool-val">true</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test36_regex_combinado_bracket_rango01() {
+    </span><span class="kw">fn </span>test43_corchete_llave() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ho[a-dA-Cx-z]{2,4}a"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hoaE"</span>).unwrap(), <span class="bool-val">false</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test37_regex_combinado_bracket_rango02() {
+    </span><span class="kw">fn </span>test44_corchete_llave() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ho[a-dA-Cx-z]{2,4}a"</span>);
-        <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hoaaaE"</span>).unwrap(), <span class="bool-val">true</span>);
+        <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hoxxaE"</span>).unwrap(), <span class="bool-val">true</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test38_regex_combinado_bracket_rango03() {
+    </span><span class="kw">fn </span>test45_corchete_llave() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ho[a-dA-Cx-z]{2,4}a"</span>);
-        <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hoaaaaaaE"</span>).unwrap(), <span class="bool-val">false</span>);
+        <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hoCCCCCa"</span>).unwrap(), <span class="bool-val">false</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test39_regex_combinado_bracket_asterisk01() {
+    </span><span class="kw">fn </span>test46_corchete_asterisco() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ho[a-dA-Cx-z]*a"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hoa"</span>).unwrap(), <span class="bool-val">true</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test40_regex_combinado_bracket_asterisk02() {
+    </span><span class="kw">fn </span>test47_corchete_asterisco() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ho[a-dA-Cx-z]*a"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hoAAAa"</span>).unwrap(), <span class="bool-val">true</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test41_regex_combinado_bracket_negado_asterisk01() {
+    </span><span class="kw">fn </span>test48_corchete_asterisco_negado() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ho[^a-dA-Cx-z]*a"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hoKa"</span>).unwrap(), <span class="bool-val">true</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test42_regex_combinado_bracket_negado_asterisk02() {
+    </span><span class="kw">fn </span>test49_corchete_asterisco_negado() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ho[^a-dA-Cx-z]*a"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hoa"</span>).unwrap(), <span class="bool-val">true</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test43_regex_clases01() {
+    </span><span class="kw">fn </span>test50_clase_alpha() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ho[[:alpha:]]a"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hola"</span>).unwrap(), <span class="bool-val">true</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test44_regex_clases02() {
+    </span><span class="kw">fn </span>test51_clase_alpha_negada() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ho[^[:alpha:]]a"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"ho8a"</span>).unwrap(), <span class="bool-val">true</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test45_regex_clases03() {
+    </span><span class="kw">fn </span>test52_clase_alnum() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ho[[:alnum:]]a"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hoKa"</span>).unwrap(), <span class="bool-val">true</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test46_regex_clases04() {
+    </span><span class="kw">fn </span>test53_clase_alnum() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ho[[:alnum:]]a"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"ho4a"</span>).unwrap(), <span class="bool-val">true</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test47_regex_clases05() {
+    </span><span class="kw">fn </span>test54_clase_alnum_negada() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ho[^[:alnum:]]a"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"ho&amp;a"</span>).unwrap(), <span class="bool-val">true</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test48_regex_clases06() {
+    </span><span class="kw">fn </span>test55_clase_digit() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ho[[:digit:]]a"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"ho2a"</span>).unwrap(), <span class="bool-val">true</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test49_regex_clases07() {
-        <span class="kw">let </span>regex = Regex::new(<span class="string">"ho[[:digit:]]a"</span>);
-        <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hoRa"</span>).unwrap(), <span class="bool-val">false</span>);
+    </span><span class="kw">fn </span>test56_clase_digit_mas() {
+        <span class="kw">let </span>regex = Regex::new(<span class="string">"ho[[:digit:]]+"</span>);
+        <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"ho9999999"</span>).unwrap(), <span class="bool-val">true</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test50_regex_clases08() {
+    </span><span class="kw">fn </span>test57_clase_digit_negada() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ho[^[:digit:]]a"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hoea"</span>).unwrap(), <span class="bool-val">true</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test51_regex_clases09() {
+    </span><span class="kw">fn </span>test58_clase_lower() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ho[[:lower:]]a"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hoRa"</span>).unwrap(), <span class="bool-val">false</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test52_regex_clases10() {
+    </span><span class="kw">fn </span>test59_clase_lower() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ho[[:lower:]]a"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hora"</span>).unwrap(), <span class="bool-val">true</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test53_regex_clases11() {
+    </span><span class="kw">fn </span>test60_clase_upper() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ho[[:upper:]]a"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hoRa"</span>).unwrap(), <span class="bool-val">true</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test54_regex_clases11() {
+    </span><span class="kw">fn </span>test61_clase_upper() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ho[[:upper:]]a"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hola"</span>).unwrap(), <span class="bool-val">false</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test55_regex_clases12() {
+    </span><span class="kw">fn </span>test62_clase_space() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ho[[:space:]]a"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"ho a"</span>).unwrap(), <span class="bool-val">true</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test56_regex_clases13() {
+    </span><span class="kw">fn </span>test63_clase_space() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ho[[:space:]]a"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hola"</span>).unwrap(), <span class="bool-val">false</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test57_regex_clases14() {
+    </span><span class="kw">fn </span>test64_clase_punct() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ho[[:punct:]]a"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"ho;a"</span>).unwrap(), <span class="bool-val">true</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test55_regex_clases15() {
+    </span><span class="kw">fn </span>test65_clase_punct() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ho[[:punct:]]a"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"ho9a"</span>).unwrap(), <span class="bool-val">false</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test56_regex_combinado_clases01() {
+    </span><span class="kw">fn </span>test66_dolar() {
+        <span class="kw">let </span>regex = Regex::new(<span class="string">"hola$"</span>);
+        <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hola"</span>).unwrap(), <span class="bool-val">true</span>);
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test67_dollar() {
+        <span class="kw">let </span>regex = Regex::new(<span class="string">"hola$"</span>);
+        <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"el dijo: hola"</span>).unwrap(), <span class="bool-val">true</span>);
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test68_dollar() {
+        <span class="kw">let </span>regex = Regex::new(<span class="string">"hola$"</span>);
+        <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"el dijo: hol"</span>).unwrap(), <span class="bool-val">false</span>);
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test69_dolar_caret() {
+        <span class="kw">let </span>regex = Regex::new(<span class="string">"^hola$"</span>);
+        <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"el dijo: hola"</span>).unwrap(), <span class="bool-val">false</span>);
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test70_dolar_caret() {
+        <span class="kw">let </span>regex = Regex::new(<span class="string">"^hola$"</span>);
+        <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hola me dijo el"</span>).unwrap(), <span class="bool-val">false</span>);
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test71_dolar_caret() {
+        <span class="kw">let </span>regex = Regex::new(<span class="string">"^hola$"</span>);
+        <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hola"</span>).unwrap(), <span class="bool-val">true</span>);
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test72_combinado() {
+        <span class="kw">let </span>regex = Regex::new(<span class="string">"ba{5,8}.c"</span>);
+        <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"baaaaaaafc"</span>).unwrap(), <span class="bool-val">true</span>);
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test73_combinado() {
+        <span class="kw">let </span>regex = Regex::new(<span class="string">"ho[k-o]a.p{2,4}"</span>);
+        <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hola3ppp"</span>).unwrap(), <span class="bool-val">true</span>);
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test74_combinado() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"^ho[[:punct:]]{2}a+"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"ho..aaaaaa"</span>).unwrap(), <span class="bool-val">true</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test57_regex_combinado_clases01() {
+    </span><span class="kw">fn </span>test75_combinado() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"ho[[:punct:]]{2}a+"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"aaaaa ho..aaaaaa"</span>).unwrap(), <span class="bool-val">true</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test58_regex_combinado_clases01() {
+    </span><span class="kw">fn </span>test76_combinado() {
         <span class="kw">let </span>regex = Regex::new(<span class="string">"[a-kA-G]ho[[:punct:]]*a\\.?"</span>);
         <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"Dho;.a."</span>).unwrap(), <span class="bool-val">true</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test59_regex_dollar() {
-        <span class="kw">let </span>regex = Regex::new(<span class="string">"hola$"</span>);
-        <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hola"</span>).unwrap(), <span class="bool-val">true</span>);
+    </span><span class="kw">fn </span>test77_combinado() {
+        <span class="kw">let </span>regex = Regex::new(<span class="string">"^hola [[:alpha:]]+"</span>);
+        <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hola como estas"</span>).unwrap(), <span class="bool-val">true</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test60_regex_dollar() {
-        <span class="kw">let </span>regex = Regex::new(<span class="string">"hola$"</span>);
-        <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"ajaja hola"</span>).unwrap(), <span class="bool-val">true</span>);
+    </span><span class="kw">fn </span>test78_combinado() {
+        <span class="kw">let </span>regex = Regex::new(<span class="string">"^hola [[:alpha:]]+"</span>);
+        <span class="macro">assert_eq!</span>(
+            regex
+                .unwrap()
+                .es_valida(<span class="string">"el me dijo: hola como estas"</span>)
+                .unwrap(),
+            <span class="bool-val">false
+        </span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test61_regex_dollar() {
-        <span class="kw">let </span>regex = Regex::new(<span class="string">"hola$"</span>);
-        <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"jaja hol"</span>).unwrap(), <span class="bool-val">false</span>);
+    </span><span class="kw">fn </span>test79_combinado() {
+        <span class="kw">let </span>regex = Regex::new(<span class="string">"[[:upper:]]ascal[[:upper:]]ase"</span>);
+        <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"PascalCase"</span>).unwrap(), <span class="bool-val">true</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test61_regex_dollar_caret() {
-        <span class="kw">let </span>regex = Regex::new(<span class="string">"^hola$"</span>);
-        <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"jajaja hola"</span>).unwrap(), <span class="bool-val">false</span>);
+    </span><span class="kw">fn </span>test80_combinado() {
+        <span class="kw">let </span>regex = Regex::new(<span class="string">"[[:upper:]]ascal[[:upper:]]ase"</span>);
+        <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"Pascalcase"</span>).unwrap(), <span class="bool-val">false</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test62_regex_dollar_caret() {
-        <span class="kw">let </span>regex = Regex::new(<span class="string">"^hola$"</span>);
-        <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hola ajajaja"</span>).unwrap(), <span class="bool-val">false</span>);
+    </span><span class="kw">fn </span>test81_combinacion_general() {
+        <span class="macro">assert_eq!</span>(
+            Regex::es_valida_general(<span class="string">"[abc]d[[:alpha:]]|k"</span>, <span class="string">"hola"</span>).unwrap(),
+            <span class="bool-val">false
+        </span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test63_regex_dollar_caret() {
-        <span class="kw">let </span>regex = Regex::new(<span class="string">"^hola$"</span>);
-        <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hola"</span>).unwrap(), <span class="bool-val">true</span>);
+    </span><span class="kw">fn </span>test82_combinacion_general() {
+        <span class="macro">assert_eq!</span>(
+            Regex::es_valida_general(<span class="string">"[abc]d[[:alpha:]]|k"</span>, <span class="string">"adAk"</span>).unwrap(),
+            <span class="bool-val">true
+        </span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test64_regex_dollar_caret() {
-        <span class="kw">let </span>regex = Regex::new(<span class="string">"^hola$"</span>);
-        <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"hola"</span>).unwrap(), <span class="bool-val">true</span>);
+    </span><span class="kw">fn </span>test83_funcion_or() {
+        <span class="macro">assert_eq!</span>(Regex::es_valida_general(<span class="string">"abc|de+f"</span>, <span class="string">"abc"</span>).unwrap(), <span class="bool-val">true</span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test64_regex_dollar_caretghdg() {
-        <span class="kw">let </span>regex = Regex::new(<span class="string">".*.{3}"</span>);
-        <span class="macro">assert_eq!</span>(regex.unwrap().es_valida(<span class="string">"fasfass aaaaaaaaaaaaaaaaaaabbb"</span>).unwrap(), <span class="bool-val">true</span>);
+    </span><span class="kw">fn </span>test84_funcion_or() {
+        <span class="macro">assert_eq!</span>(
+            Regex::es_valida_general(<span class="string">"abc|de+f"</span>, <span class="string">"deeeeeeeeeeeeeef"</span>).unwrap(),
+            <span class="bool-val">true
+        </span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test65_regex_con_or() {
-        <span class="macro">assert_eq!</span>(Regex::es_valida_general(<span class="string">"[abc]d[[:alpha:]]|k"</span>,<span class="string">"hola"</span>).unwrap(), <span class="bool-val">false</span>);
+    </span><span class="kw">fn </span>test85_funcion_or() {
+        <span class="macro">assert_eq!</span>(
+            Regex::es_valida_general(<span class="string">"abc|de+f"</span>, <span class="string">"abcdeeeeeeeeeeeeeef"</span>).unwrap(),
+            <span class="bool-val">true
+        </span>);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test65_regex_con_or2() {
-        <span class="macro">assert_eq!</span>(Regex::es_valida_general(<span class="string">"[abc]d[[:alpha:]]|k"</span>,<span class="string">"adAk"</span>).unwrap(), <span class="bool-val">true</span>);
+    </span><span class="kw">fn </span>test86_funcion_or() {
+        <span class="macro">assert_eq!</span>(
+            Regex::es_valida_general(<span class="string">"abc|de+f"</span>, <span class="string">"abdeeeeeeeeeeeeee"</span>).unwrap(),
+            <span class="bool-val">false
+        </span>);
     }
-
 }
 </code></pre></div></section></main></body></html>

@@ -83,57 +83,27 @@
 <a href="#82" id="82">82</a>
 <a href="#83" id="83">83</a>
 <a href="#84" id="84">84</a>
-<a href="#85" id="85">85</a>
-<a href="#86" id="86">86</a>
-<a href="#87" id="87">87</a>
-<a href="#88" id="88">88</a>
-<a href="#89" id="89">89</a>
-<a href="#90" id="90">90</a>
-<a href="#91" id="91">91</a>
-<a href="#92" id="92">92</a>
-<a href="#93" id="93">93</a>
-<a href="#94" id="94">94</a>
-<a href="#95" id="95">95</a>
-<a href="#96" id="96">96</a>
-<a href="#97" id="97">97</a>
-<a href="#98" id="98">98</a>
-<a href="#99" id="99">99</a>
-<a href="#100" id="100">100</a>
-<a href="#101" id="101">101</a>
-<a href="#102" id="102">102</a>
-<a href="#103" id="103">103</a>
-<a href="#104" id="104">104</a>
-<a href="#105" id="105">105</a>
-<a href="#106" id="106">106</a>
-<a href="#107" id="107">107</a>
-<a href="#108" id="108">108</a>
-<a href="#109" id="109">109</a>
-<a href="#110" id="110">110</a>
-<a href="#111" id="111">111</a>
-<a href="#112" id="112">112</a>
-<a href="#113" id="113">113</a>
-<a href="#114" id="114">114</a>
-<a href="#115" id="115">115</a>
-<a href="#116" id="116">116</a>
-<a href="#117" id="117">117</a>
-<a href="#118" id="118">118</a>
-<a href="#119" id="119">119</a>
-<a href="#120" id="120">120</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::clase_char::ClaseChar;
 
-<span class="attr">#[derive(Clone, Debug)]
-#[derive(PartialEq)]
-
+<span class="attr">#[derive(Clone, Debug, PartialEq)]
+</span><span class="doccomment">///Representa un caracter que puede ser un literal, un comodín, una serie o un dolar.
+///El literal es un caracter que se espera que sea exactamente igual al que se está comparando.
+///El comodín es un caracter que puede ser cualquier caracter.
+///La serie es un caracter que puede ser cualquier caracter de una clase de caracteres.
+///El dolar es un caracter que se espera que sea el final de la cadena.
 </span><span class="kw">pub enum </span>Caracter {
-    Literal(char), 
-    Wildcard,  
-    Lista(ClaseChar),
-    Dollar,
+    Literal(char),
+    Comodin,
+    Serie(ClaseChar),
+    Dolar,
 }
 
-<span class="kw">fn </span>calcular_longitud_utf8&lt;F&gt;(value: <span class="kw-2">&amp;</span>str, funcion: F) -&gt; usize <span class="kw">where </span>F: Fn(char) -&gt; bool,
+<span class="doccomment">///Calcula la longitud en bytes de un caracter de una cadena de texto, si pertenece a una clase de caracter.
+</span><span class="kw">fn </span>calcular_longitud_utf8_clase&lt;F&gt;(valor: <span class="kw-2">&amp;</span>str, funcion: F) -&gt; usize
+<span class="kw">where
+    </span>F: Fn(char) -&gt; bool,
 {
-    <span class="kw">if let </span><span class="prelude-val">Some</span>(c) = value.chars().next() {
+    <span class="kw">if let </span><span class="prelude-val">Some</span>(c) = valor.chars().next() {
         <span class="kw">if </span>funcion(c) {
             c.len_utf8()
         } <span class="kw">else </span>{
@@ -144,98 +114,56 @@
     </span>}
 }
 
+<span class="doccomment">///Calcula la longitud en bytes de un caracter de una cadena de texto, si es un literal.
+</span><span class="kw">fn </span>calcular_longitud_utf8_literal(valor: <span class="kw-2">&amp;</span>str, l: <span class="kw-2">&amp;</span>char) -&gt; usize {
+    <span class="kw">if </span>valor.starts_with(<span class="kw-2">*</span>l) {
+        l.len_utf8()
+    } <span class="kw">else </span>{
+        <span class="number">0
+    </span>}
+}
+
+<span class="doccomment">///Calcula la longitud en bytes de un caracter de una cadena de texto, si es un comodín.
+</span><span class="kw">fn </span>calcular_longitud_utf8_comodin(valor: <span class="kw-2">&amp;</span>str) -&gt; usize {
+    <span class="kw">if let </span><span class="prelude-val">Some</span>(c) = valor.chars().next() {
+        c.len_utf8()
+    } <span class="kw">else </span>{
+        <span class="number">0
+    </span>}
+}
+
+<span class="doccomment">///Calcula la longitud en bytes de un caracter de una cadena de texto, si es un dolar.
+</span><span class="kw">fn </span>calcular_longitud_utf8_dolar(valor: <span class="kw-2">&amp;</span>str) -&gt; usize {
+    <span class="kw">if </span>valor.chars().next().is_some() {
+        <span class="number">0
+    </span>} <span class="kw">else </span>{
+        <span class="number">1
+    </span>}
+}
+
 <span class="kw">impl </span>Caracter {
-    <span class="kw">pub fn </span>coincide(<span class="kw-2">&amp;</span><span class="self">self</span>, value: <span class="kw-2">&amp;</span>str) -&gt; usize {
-        <span class="comment">//println!("Caracter::coincide({:?}, {:?})", self, value);
-        </span><span class="kw">match </span><span class="self">self </span>{
-            Caracter::Literal(l) =&gt; {
-                <span class="kw">if </span>value.chars().next() == <span class="prelude-val">Some</span>(<span class="kw-2">*</span>l) {
-                    l.len_utf8()
-                } <span class="kw">else </span>{
-                    <span class="number">0
-                </span>}
-            }
-            Caracter::Wildcard =&gt; {
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(c) = value.chars().next() {
-                    c.len_utf8()
-                } <span class="kw">else </span>{
-                    <span class="number">0
-                </span>}
-            }
-            Caracter::Lista(clase) =&gt; {
-               <span class="comment">// println!("en lista");
-                </span><span class="kw">match </span>clase {
-                    ClaseChar::Alpha =&gt; {
-                        <span class="macro">println!</span>(<span class="string">"en alpha"</span>);
-                        <span class="kw">if let </span><span class="prelude-val">Some</span>(c) = value.chars().next() {
-                            <span class="kw">if </span>c.is_alphabetic() {
-                                c.len_utf8()
-                            } <span class="kw">else </span>{
-                                <span class="number">0
-                            </span>}
-                        } <span class="kw">else </span>{
-                            <span class="number">0
-                        </span>}
-                    }
-                    ClaseChar::Alnum =&gt; {
-                        <span class="comment">//println!("en alnum");
-                        </span>calcular_longitud_utf8(value, char::is_alphanumeric)
-                    }
-                    ClaseChar::Digit =&gt; {
-                       <span class="comment">// println!("en digit");
-                        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(c) = value.chars().next() {
-                            <span class="kw">if </span>c.is_digit(<span class="number">10</span>) {
-                                c.len_utf8()
-                            } <span class="kw">else </span>{
-                                <span class="number">0
-                            </span>}
-                        } <span class="kw">else </span>{
-                            <span class="number">0
-                        </span>}
-                    }
-                    ClaseChar::Lower =&gt; {
-                        <span class="comment">//println!("en alpha");
-                        </span>calcular_longitud_utf8(value, char::is_lowercase)
-                    }
-                    ClaseChar::Upper =&gt; {
-                     <span class="comment">//   println!("en alpha");
-                        </span>calcular_longitud_utf8(value, char::is_uppercase)
-                    }
-                    ClaseChar::Space =&gt; {
-                        <span class="comment">//println!("en alpha");
-                        </span>calcular_longitud_utf8(value, char::is_whitespace)
-                    }
-                    ClaseChar::Punct =&gt; {
-                        <span class="kw">if let </span><span class="prelude-val">Some</span>(c) = value.chars().next() {
-                            <span class="kw">if </span>c.is_ascii_punctuation() {
-                                c.len_utf8()
-                            } <span class="kw">else </span>{
-                                <span class="number">0
-                            </span>}
-                        } <span class="kw">else </span>{
-                            <span class="number">0
-                        </span>}
-                    }
-                    ClaseChar::Simple(list) =&gt; {
-                        <span class="kw">if let </span><span class="prelude-val">Some</span>(c) = value.chars().next() {
-                            <span class="kw">if </span>list.contains(<span class="kw-2">&amp;</span>c) {
-                                c.len_utf8()
-                            } <span class="kw">else </span>{
-                                <span class="number">0
-                            </span>}
-                        } <span class="kw">else </span>{
-                            <span class="number">0
-                        </span>}
-                    }
+    <span class="doccomment">///Según el tipo de caracter con el que estemos trabajando, se calcula su longitud en bytes.
+    </span><span class="kw">pub fn </span>coincide(<span class="kw-2">&amp;</span><span class="self">self</span>, valor: <span class="kw-2">&amp;</span>str) -&gt; usize {
+        <span class="kw">match </span><span class="self">self </span>{
+            Caracter::Literal(l) =&gt; calcular_longitud_utf8_literal(valor, l),
+            Caracter::Comodin =&gt; calcular_longitud_utf8_comodin(valor),
+            Caracter::Serie(clase) =&gt; <span class="kw">match </span>clase {
+                ClaseChar::Alpha =&gt; {
+                    calcular_longitud_utf8_clase(valor, |c: char| char::is_ascii_alphabetic(<span class="kw-2">&amp;</span>c))
                 }
-            }
-            Caracter::Dollar =&gt; {
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw">_</span>) = value.chars().next() {
-                    <span class="number">0
-                </span>} <span class="kw">else </span>{
-                    <span class="number">1
-                </span>}
-            }
+                ClaseChar::Alnum =&gt; calcular_longitud_utf8_clase(valor, char::is_alphanumeric),
+                ClaseChar::Digit =&gt; calcular_longitud_utf8_clase(valor, |c| c.is_ascii_digit()),
+                ClaseChar::Lower =&gt; calcular_longitud_utf8_clase(valor, char::is_lowercase),
+                ClaseChar::Upper =&gt; calcular_longitud_utf8_clase(valor, char::is_uppercase),
+                ClaseChar::Space =&gt; calcular_longitud_utf8_clase(valor, char::is_whitespace),
+                ClaseChar::Punct =&gt; {
+                    calcular_longitud_utf8_clase(valor, |c: char| char::is_ascii_punctuation(<span class="kw-2">&amp;</span>c))
+                }
+                ClaseChar::Simple(list) =&gt; {
+                    calcular_longitud_utf8_clase(valor, |c| list.contains(<span class="kw-2">&amp;</span>c))
+                }
+            },
+            Caracter::Dolar =&gt; calcular_longitud_utf8_dolar(valor),
         }
     }
 }

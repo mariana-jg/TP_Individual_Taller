@@ -10,9 +10,15 @@
 <a href="#9" id="9">9</a>
 <a href="#10" id="10">10</a>
 <a href="#11" id="11">11</a>
-</pre></div><pre class="rust"><code><span class="attr">#[derive(Clone, Debug)]
-#[derive(PartialEq)]
-
+<a href="#12" id="12">12</a>
+<a href="#13" id="13">13</a>
+<a href="#14" id="14">14</a>
+</pre></div><pre class="rust"><code><span class="attr">#[derive(Clone, Debug, PartialEq)]
+</span><span class="doccomment">///Representa una repetición que puede ser exacta, alguna o un rango.
+/// - Exacta: se espera que se repita exactamente la cantidad de veces indicada.
+/// - Alguna: se espera que se repita alguna vez.
+/// - Rango: se espera que se repita una cantidad de veces dentro de un rango, donde
+///se guarda el mínimo y máximo de repeticiones.
 </span><span class="kw">pub enum </span>Repeticion {
     Exacta(usize, bool),
     Alguna(bool),

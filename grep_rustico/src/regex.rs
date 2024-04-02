@@ -8,6 +8,8 @@ use crate::paso_evaluado::PasoEvaluado;
 use crate::paso_regex::PasoRegex;
 use crate::repeticion::Repeticion;
 
+
+///Caracteres especiales que se utilizan en las expresiones regulares.
 const CORCHETE_ABIERTO: char = '[';
 const CORCHETE_CERRADO: char = ']';
 const LLAVE_ABIERTA: char = '{';
@@ -22,11 +24,14 @@ const CARET: char = '^';
 const INDICADOR_CLASE: char = ':';
 const SEPARADOR_RANGO: char = '-';
 const FUNCION_OR: char = '|';
-
+///Representa una expresión regular que se puede evaluar en una cadena de texto.
+/// Contiene una lista de pasos que se deben cumplir para que la expresión regular sea válida.
 pub struct Regex {
     pasos: Vec<PasoRegex>,
 }
 
+
+///Obtiene el contenido de un corchete, si es que lo hay.
 fn obtener_auxiliar(chars_iter: &mut Chars<'_>) -> (Vec<char>, bool, bool) {
     let mut cantidad_corchetes = 1;
     let mut hay_clase = false;
@@ -49,6 +54,7 @@ fn obtener_auxiliar(chars_iter: &mut Chars<'_>) -> (Vec<char>, bool, bool) {
     (auxiliar, hay_clase, es_negado)
 }
 
+///Determina el contenido de un corchete.
 fn determinar_contenido_a_evaluar(auxiliar: Vec<char>) -> Result<HashSet<char>, Error> {
     let mut contenido: HashSet<char> = HashSet::new();
 
@@ -64,6 +70,7 @@ fn determinar_contenido_a_evaluar(auxiliar: Vec<char>) -> Result<HashSet<char>, 
     Ok(contenido)
 }
 
+///Obtiene la clase de caracter que se debe evaluar.
 fn conseguir_lista(chars_iter: &mut Chars<'_>) -> Result<(ClaseChar, bool), Error> {
     let (auxiliar, hay_clase, es_negado) = obtener_auxiliar(chars_iter);
 
@@ -90,11 +97,27 @@ fn conseguir_lista(chars_iter: &mut Chars<'_>) -> Result<(ClaseChar, bool), Erro
     }
 }
 
+///Determina si el caracter anterior es un comodín. 
+///Para verificar que la expresión regular no comience con una repetición.
 fn no_hay_anterior(anterior: &mut PasoRegex) -> bool {
     anterior.caracter_interno == Caracter::Comodin
         && anterior.repeticiones == Repeticion::Alguna(false)
 }
 
+///Agrega los pasos a la expresión regular.
+/// - Si el caracter es un punto, se agrega un paso con un comodín.
+/// - Si el caracter es un literal, se agrega un paso con el literal.
+/// - Si el caracter es una llave abierta, se obtiene el contenido de la llave y se agrega un paso con la cantidad de repeticiones
+/// y según si se trata de una repetición exacta, con solo mínimo, con solo máximo o ambas.
+/// - Si el caracter es un corchete abierto, se obtiene el contenido del corchete y se agrega un paso con la clase de caracteres.
+/// - Si el caracter es un asterisco, se agrega un paso con Alguna cantidad de repeticiones.
+/// - Si el caracter es un signo de interrogación, se agrega un paso con la cantidad de repeticiones (0 o 1 vez).
+/// - Si el caracter es un signo de más, se agrega un paso con la cantidad de repeticiones (1 o más).
+/// - Si el caracter es una barra, se obtiene el siguiente caracter y se agrega un paso con el literal.
+/// - Si el caracter es un dolar, se agrega un paso con un dolar.
+/// - Si el caracter es un caret, no se agrega un paso.
+/// - Si el caracter es una función OR, no se agrega un paso.
+/// - Si el caracter no es procesable, se devuelve un error.
 pub fn agregar_pasos(
     steps: &mut Vec<PasoRegex>,
     chars_iter: &mut Chars<'_>,
@@ -238,6 +261,8 @@ pub fn agregar_pasos(
     Ok(steps.to_vec())
 }
 
+///Determina si se debe agregar un paso con un comodín al principio de la expresión regular
+///(como un .*), si esta no comienza con un CARET ^.
 fn definir_uso_de_caret(expression: &str, steps: &mut Vec<PasoRegex>) {
     if !expression.starts_with(CARET) {
         let paso = Some(PasoRegex {
@@ -250,11 +275,15 @@ fn definir_uso_de_caret(expression: &str, steps: &mut Vec<PasoRegex>) {
     }
 }
 
+///Verifica si la expresión regular está escrita correctamente.
+///Determina si las llaves y los corchetes se abren y se cierran
+///como corresponde. En cada caso devuelve un error explicativo.
+/// Además, verifica que la función OR no esté dentro de llaves o corchetes.
 fn expresion_escrita_correctamente(expresion: &str) -> Result<(), Error> {
-    let mut iter = expresion.chars();
+    let iter = expresion.chars();
     let mut cont_llaves = 0;
     let mut cont_corchetes = 0;
-    while let Some(c) = iter.next() {
+    for c in iter {
         match c {
             LLAVE_ABIERTA => cont_llaves += 1,
             LLAVE_CERRADA => cont_llaves -= 1,
@@ -276,7 +305,14 @@ fn expresion_escrita_correctamente(expresion: &str) -> Result<(), Error> {
     }
     Ok(())
 }
+
+
 impl Regex {
+
+    ///Verifica si una expresión regular es válida para una línea de texto.
+    /// - Si la expresión regular está escrita correctamente, se evalúa si la línea cumple con la expresión regular.
+    /// En caso de tener una función OR, se evalúa si alguna de las expresiones es válida.
+    /// - Si la expresión regular no está escrita correctamente, se devuelve un error.
     pub fn es_valida_general(expresion_completa: &str, linea: &str) -> Result<bool, Error> {
         let mut valida = false;
 
@@ -296,10 +332,12 @@ impl Regex {
                 }
                 Ok(valida)
             }
-            Err(error) => return Err(error),
+            Err(error) => Err(error),
         }
     }
 
+    ///Crea una nueva expresión regular a partir de una cadena de texto.
+    /// Teniendo en cuenta si comienza con un CARET ^ o no.
     pub fn new(expression: &str) -> Result<Self, Error> {
         let mut steps: Vec<PasoRegex> = Vec::new();
         let mut chars_iter = expression.chars();
@@ -311,6 +349,10 @@ impl Regex {
         Ok(Regex { pasos: steps })
     }
 
+    ///Verifica si una expresión regular es válida para una línea de texto.
+    ///es el "validador" de la expresión regular.
+    /// Según el tipo de repetición, se busca en la línea de texto la
+    /// coincidencia. Si no se encuentra, se evalúa si se puede hacer un backtrack.
     pub fn es_valida(self, linea: &str) -> Result<bool, Error> {
         if !linea.is_ascii() {
             return Err(Error::FormatoDeLineaNoASCII);
@@ -414,6 +456,10 @@ impl Regex {
     }
 }
 
+///Realiza un backtrack en la expresión regular.
+/// - Si el paso es backtrackeable, se devuelve el tamaño del matcheo.
+/// - Si el paso no es backtrackeable, se agrega el paso a la cola de pasos.
+/// - Si no se puede hacer un backtrack, se devuelve None.
 fn backtrack(
     actual: PasoRegex,
     evaluados: &mut Vec<PasoEvaluado>,
@@ -434,13 +480,10 @@ fn backtrack(
     None
 }
 
-///test unitarios
 #[cfg(test)]
 mod tests {
     use super::*;
-    ///Del test01 al test71 se pruebas funcionalidades basicas. Luego se prueban combinaciones.
-    ///Del test72 al test79 se prueban combinaciones
-    /// Del test79 en adelante probamos expresiones cuya regex puede dividirse en 2 partes.
+
     #[test]
     fn test01_literales() {
         let regex = Regex::new("abcd");
