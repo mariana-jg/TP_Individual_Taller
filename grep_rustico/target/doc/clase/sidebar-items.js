@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"mod":["caracter","clase_char","errors","paso_evaluado","paso_regex","regex","repeticion","verficacion_inicial"]};

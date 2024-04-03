@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"fn":["puedo_procesar_archivo","verificar_inicio"]};
