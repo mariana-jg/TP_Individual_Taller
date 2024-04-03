@@ -1,5 +1,5 @@
 [package]
-name = "clase"
+name = "grep_rustico"
 version = "0.1.0"
 edition = "2021"
 

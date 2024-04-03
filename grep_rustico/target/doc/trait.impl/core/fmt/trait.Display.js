@@ -1,3 +1,4 @@
 (function() {var implementors = {
-"clase":[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.76.0/core/fmt/trait.Display.html\" title=\"trait core::fmt::Display\">Display</a> for <a class=\"enum\" href=\"clase/errors/enum.Error.html\" title=\"enum clase::errors::Error\">Error</a>"]]
+"clase":[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.76.0/core/fmt/trait.Display.html\" title=\"trait core::fmt::Display\">Display</a> for <a class=\"enum\" href=\"clase/errors/enum.Error.html\" title=\"enum clase::errors::Error\">Error</a>"]],
+"grep_rustico":[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.76.0/core/fmt/trait.Display.html\" title=\"trait core::fmt::Display\">Display</a> for <a class=\"enum\" href=\"grep_rustico/errors/enum.Error.html\" title=\"enum grep_rustico::errors::Error\">Error</a>"]]
 };if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

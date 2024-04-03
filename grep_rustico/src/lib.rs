@@ -12,4 +12,4 @@ pub mod paso_evaluado;
 
 pub mod errors;
 
-pub mod verficacion_inicial;
+pub mod verificacion_inicial;

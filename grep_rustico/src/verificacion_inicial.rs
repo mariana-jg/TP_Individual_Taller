@@ -66,7 +66,7 @@ mod tests {
             verificar_inicio(vec![
                 "cargo run".to_string(),
                 "abcd".to_string(),
-                "/home/mari/Escritorio/tp1_taller/grep_rustico/prueba.txt".to_string()
+                "src/prueba.txt".to_string()
             ]),
             Ok(vec![
                 "Hola".to_string(),
@@ -90,7 +90,7 @@ mod tests {
     #[test]
     fn test03_puedo_procesar_archivo() {
         assert_eq!(
-            puedo_procesar_archivo("/home/mari/Escritorio/tp1_taller/grep_rustico/prueba.txt"),
+            puedo_procesar_archivo("src/prueba.txt"),
             Ok(vec![
                 "Hola".to_string(),
                 "esto".to_string(),

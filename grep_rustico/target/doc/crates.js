@@ -1,1 +1,1 @@
-window.ALL_CRATES = ["clase"];
+window.ALL_CRATES = ["clase","grep_rustico"];
