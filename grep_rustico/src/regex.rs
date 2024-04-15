@@ -80,13 +80,13 @@ fn conseguir_lista(chars_iter: &mut Chars<'_>) -> Result<(ClaseChar, bool), Erro
         let class: String = auxiliar.iter().collect();
 
         match class.to_string().as_str() {
-            "alpha" => return Ok((ClaseChar::Alpha, es_negado)),
-            "alnum" => return Ok((ClaseChar::Alnum, es_negado)),
-            "digit" => return Ok((ClaseChar::Digit, es_negado)),
-            "lower" => return Ok((ClaseChar::Lower, es_negado)),
-            "upper" => return Ok((ClaseChar::Upper, es_negado)),
-            "space" => return Ok((ClaseChar::Space, es_negado)),
-            "punct" => return Ok((ClaseChar::Punct, es_negado)),
+            "alpha" => return Ok((ClaseChar::Alpha(es_negado), es_negado)),
+            "alnum" => return Ok((ClaseChar::Alnum(es_negado), es_negado)),
+            "digit" => return Ok((ClaseChar::Digit(es_negado), es_negado)),
+            "lower" => return Ok((ClaseChar::Lower(es_negado), es_negado)),
+            "upper" => return Ok((ClaseChar::Upper(es_negado), es_negado)),
+            "space" => return Ok((ClaseChar::Space(es_negado), es_negado)),
+            "punct" => return Ok((ClaseChar::Punct(es_negado), es_negado)),
             _ => {}
         }
     }
@@ -94,7 +94,7 @@ fn conseguir_lista(chars_iter: &mut Chars<'_>) -> Result<(ClaseChar, bool), Erro
     let contenido = determinar_contenido_a_evaluar(auxiliar);
 
     match contenido {
-        Ok(contenido) => Ok((ClaseChar::Simple(contenido), es_negado)),
+        Ok(contenido) => Ok((ClaseChar::Simple(contenido, es_negado), es_negado)),
         Err(error) => Err(error),
     }
 }
@@ -108,14 +108,14 @@ fn no_hay_anterior(anterior: &mut PasoRegex) -> bool {
 
 fn fabricar_paso_punto() -> Result<Option<PasoRegex>, Error> {
     Ok(Some(PasoRegex {
-        repeticiones: Repeticion::Exacta(1, false),
+        repeticiones: Repeticion::Exacta(1),
         caracter_interno: Caracter::Comodin,
     }))
 }
 
 fn fabricar_paso_literal(c: char) -> Result<Option<PasoRegex>, Error> {
     Ok(Some(PasoRegex {
-        repeticiones: Repeticion::Exacta(1, false),
+        repeticiones: Repeticion::Exacta(1),
         caracter_interno: Caracter::Literal(c),
     }))
 }
@@ -162,7 +162,7 @@ fn fabricar_paso_llave(
                 };
             }
         } else if contenido.len() == 1 && contenido[0].is_ascii_digit() {
-            ultimo.repeticiones = Repeticion::Exacta(rangos[0], false);
+            ultimo.repeticiones = Repeticion::Exacta(rangos[0]);
         } else {
             return Err(Error::ErrorEnLlaves);
         }
@@ -174,7 +174,7 @@ fn fabricar_paso_llave(
 fn fabricar_paso_corchete(chars_iter: &mut Chars<'_>) -> Result<Option<PasoRegex>, Error> {
     match conseguir_lista(chars_iter) {
         Ok(contenido) => Ok(Some(PasoRegex {
-            repeticiones: Repeticion::Exacta(1, contenido.1),
+            repeticiones: Repeticion::Exacta(1),
             caracter_interno: Caracter::Serie(contenido.0),
         })),
         Err(error) => Err(error),
@@ -229,7 +229,7 @@ fn fabricar_paso_asterisco(
 fn fabricar_paso_barra(chars_iter: &mut Chars<'_>) -> Result<Option<PasoRegex>, Error> {
     match chars_iter.next() {
         Some(literal) => Ok(Some(PasoRegex {
-            repeticiones: Repeticion::Exacta(1, false),
+            repeticiones: Repeticion::Exacta(1),
             caracter_interno: Caracter::Literal(literal),
         })),
         None => Err(Error::CaracterNoProcesable),
@@ -238,7 +238,7 @@ fn fabricar_paso_barra(chars_iter: &mut Chars<'_>) -> Result<Option<PasoRegex>, 
 
 fn fabricar_paso_dolar() -> Result<Option<PasoRegex>, Error> {
     Ok(Some(PasoRegex {
-        repeticiones: Repeticion::Exacta(1, false),
+        repeticiones: Repeticion::Exacta(1),
         caracter_interno: Caracter::Dolar,
     }))
 }
@@ -390,22 +390,18 @@ impl Regex {
 
         'pasos: while let Some(paso) = cola.pop_front() {
             match paso.repeticiones {
-                Repeticion::Exacta(n, negacion) => {
+                Repeticion::Exacta(n) => {
                     let mut tam_coincidencia = 0;
                     for _ in 0..n {
                         let avance = paso.caracter_interno.coincide(&linea[index..]);
                         if avance == 0 {
-                            match backtrack(paso, &mut pila, &mut cola) {
+                            match backtrack(paso.clone(), &mut pila, &mut cola) {
                                 Some(size) => {
                                     index -= size;
                                     continue 'pasos;
                                 }
                                 None => {
-                                    if negacion {
-                                        return Ok(true);
-                                    } else {
-                                        return Ok(false);
-                                    }
+                                    return Ok(false);
                                 }
                             }
                         } else {
@@ -413,21 +409,16 @@ impl Regex {
                             index += avance;
                         }
                     }
-
                     pila.push(PasoEvaluado {
                         paso,
                         tam_matcheo: tam_coincidencia,
                         backtrackeable: false,
-                    });
-                    if negacion {
-                        return Ok(false);
-                    }
+                    }); 
                 }
                 Repeticion::Alguna(negacion) => {
                     let mut sigo_avanzando = true;
                     while sigo_avanzando {
                         let avance = paso.caracter_interno.coincide(&linea[index..]);
-
                         if avance != 0 {
                             index += avance;
                             pila.push(PasoEvaluado {
@@ -438,9 +429,9 @@ impl Regex {
                         } else {
                             sigo_avanzando = false;
                         }
-                        if negacion {
+                      /*   if negacion {
                             return Ok(false);
-                        }
+                        }*/
                     }
                 }
                 Repeticion::Rango { min, max } => {
@@ -450,8 +441,6 @@ impl Regex {
                         Some(max) => max,
                         None => linea.len() - index,
                     };
-
-
 
                     let mut aux: Vec<PasoEvaluado> = Vec::new();
 

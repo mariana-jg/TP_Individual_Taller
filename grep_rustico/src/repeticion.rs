@@ -9,7 +9,7 @@
 /// se repita exactamente la cantidad de veces indicada o no se espera que se repita,
 /// como por ejemplo en los casos del operador de negación ^ dentro de los corchetes.
 pub enum Repeticion {
-    Exacta(usize, bool),
+    Exacta(usize),
     Alguna(bool),
     Rango {
         min: Option<usize>,

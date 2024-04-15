@@ -6,12 +6,12 @@ use std::collections::HashSet;
 ///que son las clases que soporta nuestro grep rústico.
 ///Además, se agrega una clase que representa un conjunto de caracteres simples.
 pub enum ClaseChar {
-    Alnum,
-    Alpha,
-    Digit,
-    Lower,
-    Upper,
-    Space,
-    Punct,
-    Simple(HashSet<char>),
+    Alnum(bool),
+    Alpha(bool),
+    Digit(bool),
+    Lower(bool),
+    Upper(bool),
+    Space(bool),
+    Punct(bool),
+    Simple(HashSet<char>, bool),
 }
