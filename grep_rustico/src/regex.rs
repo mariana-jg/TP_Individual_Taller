@@ -413,7 +413,7 @@ impl Regex {
                         paso,
                         tam_matcheo: tam_coincidencia,
                         backtrackeable: false,
-                    }); 
+                    });
                 }
                 Repeticion::Alguna(negacion) => {
                     let mut sigo_avanzando = true;
@@ -429,9 +429,9 @@ impl Regex {
                         } else {
                             sigo_avanzando = false;
                         }
-                      /*   if negacion {
+                           if negacion {
                             return Ok(false);
-                        }*/
+                        }
                     }
                 }
                 Repeticion::Rango { min, max } => {
@@ -449,23 +449,27 @@ impl Regex {
                         let avance = paso.caracter_interno.coincide(&linea[index..]);
 
                         if avance != 0 {
+                            let back= aux.len() >= min;
                             index += avance;
                             aux.push(PasoEvaluado {
                                 paso: paso.clone(),
                                 tam_matcheo: avance,
-                                backtrackeable: true,
+                                backtrackeable: back,
                             });
                             pila.push(PasoEvaluado {
                                 paso: paso.clone(),
                                 tam_matcheo: avance,
-                                backtrackeable: true,
-                            })
+                                backtrackeable: back,
+                            });
+                            if aux.len() == max {
+                                sigo_avanzando = false;
+                            }
                         } else {
                             sigo_avanzando = false;
                         }
                     }
 
-                    if aux.len() < min || aux.len() > max {
+                     if aux.len() < min  {
                         return Ok(false);
                     }
                 }
@@ -611,7 +615,7 @@ mod tests {
     #[test]
     fn test18_interrogacion() {
         let regex = Regex::new("hola?");
-        assert_eq!(regex.unwrap().es_valida("holaaaaa").unwrap(), false);
+        assert_eq!(regex.unwrap().es_valida("holaaaaa").unwrap(), true);
     }
 
     #[test]

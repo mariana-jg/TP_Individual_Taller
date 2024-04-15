@@ -66,6 +66,7 @@ fn calcular_longitud_utf8_dolar(valor: &str) -> usize {
 impl Caracter {
     ///Según el tipo de caracter con el que estemos trabajando, se calcula su longitud en bytes.
     pub fn coincide(&self, valor: &str) -> usize {
+      // println!("valor: {} coincide con {:?}", valor, self);
         match self {
             Caracter::Literal(l) => calcular_longitud_utf8_literal(valor, l),
             Caracter::Comodin => calcular_longitud_utf8_comodin(valor),
