@@ -10,7 +10,7 @@
 /// como por ejemplo en los casos del operador de negación ^ dentro de los corchetes.
 pub enum Repeticion {
     Exacta(usize),
-    Alguna(bool),
+    Alguna,
     Rango {
         min: Option<usize>,
         max: Option<usize>,

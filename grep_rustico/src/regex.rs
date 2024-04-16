@@ -73,20 +73,20 @@ fn determinar_contenido_a_evaluar(auxiliar: Vec<char>) -> Result<HashSet<char>, 
 /// - Si la clase de caracter es una de las predefinidas, se devuelve la clase de caracter correspondiente.
 /// - Si la clase de caracter no es predefinida, se determina el contenido de la clase de caracter.
 /// - Si no se puede determinar el contenido de la clase de caracter, se devuelve un error.
-fn conseguir_lista(chars_iter: &mut Chars<'_>) -> Result<(ClaseChar, bool), Error> {
+fn conseguir_lista(chars_iter: &mut Chars<'_>) -> Result<ClaseChar, Error> {
     let (auxiliar, hay_clase, es_negado) = obtener_auxiliar(chars_iter);
 
     if hay_clase {
         let class: String = auxiliar.iter().collect();
 
         match class.to_string().as_str() {
-            "alpha" => return Ok((ClaseChar::Alpha(es_negado), es_negado)),
-            "alnum" => return Ok((ClaseChar::Alnum(es_negado), es_negado)),
-            "digit" => return Ok((ClaseChar::Digit(es_negado), es_negado)),
-            "lower" => return Ok((ClaseChar::Lower(es_negado), es_negado)),
-            "upper" => return Ok((ClaseChar::Upper(es_negado), es_negado)),
-            "space" => return Ok((ClaseChar::Space(es_negado), es_negado)),
-            "punct" => return Ok((ClaseChar::Punct(es_negado), es_negado)),
+            "alpha" => return Ok(ClaseChar::Alpha(es_negado)),
+            "alnum" => return Ok(ClaseChar::Alnum(es_negado)),
+            "digit" => return Ok(ClaseChar::Digit(es_negado)),
+            "lower" => return Ok(ClaseChar::Lower(es_negado)),
+            "upper" => return Ok(ClaseChar::Upper(es_negado)),
+            "space" => return Ok(ClaseChar::Space(es_negado)),
+            "punct" => return Ok(ClaseChar::Punct(es_negado)),
             _ => {}
         }
     }
@@ -94,7 +94,7 @@ fn conseguir_lista(chars_iter: &mut Chars<'_>) -> Result<(ClaseChar, bool), Erro
     let contenido = determinar_contenido_a_evaluar(auxiliar);
 
     match contenido {
-        Ok(contenido) => Ok((ClaseChar::Simple(contenido, es_negado), es_negado)),
+        Ok(contenido) => Ok(ClaseChar::Simple(contenido, es_negado)),
         Err(error) => Err(error),
     }
 }
@@ -102,8 +102,7 @@ fn conseguir_lista(chars_iter: &mut Chars<'_>) -> Result<(ClaseChar, bool), Erro
 ///Determina si el caracter anterior es un comodín.
 ///Para verificar que la expresión regular no comience con una repetición.
 fn no_hay_anterior(anterior: &mut PasoRegex) -> bool {
-    anterior.caracter_interno == Caracter::Comodin
-        && anterior.repeticiones == Repeticion::Alguna(false)
+    anterior.caracter_interno == Caracter::Comodin && anterior.repeticiones == Repeticion::Alguna
 }
 
 fn fabricar_paso_punto() -> Result<Option<PasoRegex>, Error> {
@@ -175,7 +174,7 @@ fn fabricar_paso_corchete(chars_iter: &mut Chars<'_>) -> Result<Option<PasoRegex
     match conseguir_lista(chars_iter) {
         Ok(contenido) => Ok(Some(PasoRegex {
             repeticiones: Repeticion::Exacta(1),
-            caracter_interno: Caracter::Serie(contenido.0),
+            caracter_interno: Caracter::Serie(contenido),
         })),
         Err(error) => Err(error),
     }
@@ -218,7 +217,7 @@ fn fabricar_paso_asterisco(
             return Err(Error::ErrorEnRepeticion);
         } else {
             match conseguir_lista(chars_iter) {
-                Ok((_, negado)) => ultimo.repeticiones = Repeticion::Alguna(negado),
+                Ok(_) => ultimo.repeticiones = Repeticion::Alguna,
                 Err(error) => return Err(error),
             };
         }
@@ -295,7 +294,7 @@ pub fn agregar_pasos(
 fn definir_uso_de_caret(expresion: &str, pasos: &mut Vec<PasoRegex>) {
     if !expresion.starts_with(CARET) {
         let paso = Some(PasoRegex {
-            repeticiones: Repeticion::Alguna(false),
+            repeticiones: Repeticion::Alguna,
             caracter_interno: Caracter::Comodin,
         });
         if let Some(p) = paso {
@@ -364,7 +363,7 @@ impl Regex {
     }
 
     ///Crea una nueva expresión regular a partir de una cadena de texto.
-    /// Teniendo en cuenta si comienza con un CARET ^ o no.
+    ///Teniendo en cuenta si comienza con un CARET ^ o no.
     pub fn new(expresion: &str) -> Result<Self, Error> {
         let mut pasos: Vec<PasoRegex> = Vec::new();
         let mut chars_iter = expresion.chars();
@@ -374,6 +373,111 @@ impl Regex {
         let pasos: Vec<PasoRegex> = agregar_pasos(&mut pasos, &mut chars_iter)?;
 
         Ok(Regex { pasos })
+    }
+
+    ///Procesa "alguna" repeticion.
+    fn procesar_alguna(
+        paso: &PasoRegex,
+        linea: &str,
+        index: &mut usize,
+        pila: &mut Vec<PasoEvaluado>,
+    ) {
+        let mut sigo_avanzando = true;
+        while sigo_avanzando {
+            let avance = paso.caracter_interno.coincide(&linea[*index..]);
+            if avance != 0 {
+                *index += avance;
+                pila.push(PasoEvaluado {
+                    paso: paso.clone(),
+                    tam_matcheo: avance,
+                    backtrackeable: true,
+                })
+            } else {
+                sigo_avanzando = false;
+            }
+        }
+    }
+
+    ///Procesa una repetición exacta.
+    fn procesar_exacta(
+        cola: &mut VecDeque<PasoRegex>,
+        pila: &mut Vec<PasoEvaluado>,
+        index: &mut usize,
+        paso: PasoRegex,
+        linea: &str,
+        n: usize,
+    ) -> Result<bool, Error> {
+        let mut tam_coincidencia = 0;
+        for _ in 0..n {
+            let avance = paso.caracter_interno.coincide(&linea[*index..]);
+            if avance == 0 {
+                if let Some(size) = backtrack(paso.clone(), pila, cola) {
+                    *index -= size;
+                    return Ok(true);
+                } else {
+                    return Ok(false);
+                }
+            } else {
+                tam_coincidencia += avance;
+                *index += avance;
+            }
+        }
+        pila.push(PasoEvaluado {
+            paso,
+            tam_matcheo: tam_coincidencia,
+            backtrackeable: false,
+        });
+        Ok(true)
+    }
+
+    ///Procesa una repetición en un rango de repeticiones.
+    fn procesar_rango(
+        pila: &mut Vec<PasoEvaluado>,
+        index: &mut usize,
+        paso: PasoRegex,
+        linea: &str,
+        min: Option<usize>,
+        max: Option<usize>,
+    ) -> Result<bool, Error> {
+        let min = min.unwrap_or(0);
+
+        let max = match max {
+            Some(max) => max,
+            None => linea.len() - *index,
+        };
+
+        let mut aux: Vec<PasoEvaluado> = Vec::new();
+
+        let mut sigo_avanzando = true;
+        while sigo_avanzando {
+            let avance = paso.caracter_interno.coincide(&linea[*index..]);
+
+            if avance != 0 {
+                let back = aux.len() >= min;
+                *index += avance;
+                aux.push(PasoEvaluado {
+                    paso: paso.clone(),
+                    tam_matcheo: avance,
+                    backtrackeable: back,
+                });
+                pila.push(PasoEvaluado {
+                    paso: paso.clone(),
+                    tam_matcheo: avance,
+                    backtrackeable: back,
+                });
+                if aux.len() == max {
+                    sigo_avanzando = false;
+                }
+            } else {
+                sigo_avanzando = false;
+            }
+        }
+
+        if aux.len() < min {
+            return Ok(false);
+        }
+
+        Ok(true)
     }
 
     ///Verifica si una expresión regular es válida para una línea de texto,
@@ -388,88 +492,16 @@ impl Regex {
         let mut pila: Vec<PasoEvaluado> = Vec::new();
         let mut index = 0;
 
-        'pasos: while let Some(paso) = cola.pop_front() {
+        while let Some(paso) = cola.pop_front() {
             match paso.repeticiones {
                 Repeticion::Exacta(n) => {
-                    let mut tam_coincidencia = 0;
-                    for _ in 0..n {
-                        let avance = paso.caracter_interno.coincide(&linea[index..]);
-                        if avance == 0 {
-                            match backtrack(paso.clone(), &mut pila, &mut cola) {
-                                Some(size) => {
-                                    index -= size;
-                                    continue 'pasos;
-                                }
-                                None => {
-                                    return Ok(false);
-                                }
-                            }
-                        } else {
-                            tam_coincidencia += avance;
-                            index += avance;
-                        }
-                    }
-                    pila.push(PasoEvaluado {
-                        paso,
-                        tam_matcheo: tam_coincidencia,
-                        backtrackeable: false,
-                    });
-                }
-                Repeticion::Alguna(negacion) => {
-                    let mut sigo_avanzando = true;
-                    while sigo_avanzando {
-                        let avance = paso.caracter_interno.coincide(&linea[index..]);
-                        if avance != 0 {
-                            index += avance;
-                            pila.push(PasoEvaluado {
-                                paso: paso.clone(),
-                                tam_matcheo: avance,
-                                backtrackeable: true,
-                            })
-                        } else {
-                            sigo_avanzando = false;
-                        }
-                           if negacion {
-                            return Ok(false);
-                        }
+                    if !Self::procesar_exacta(&mut cola, &mut pila, &mut index, paso, linea, n)? {
+                        return Ok(false);
                     }
                 }
+                Repeticion::Alguna => Self::procesar_alguna(&paso, linea, &mut index, &mut pila),
                 Repeticion::Rango { min, max } => {
-                    let min = min.unwrap_or(0);
-
-                    let max = match max {
-                        Some(max) => max,
-                        None => linea.len() - index,
-                    };
-
-                    let mut aux: Vec<PasoEvaluado> = Vec::new();
-
-                    let mut sigo_avanzando = true;
-                    while sigo_avanzando {
-                        let avance = paso.caracter_interno.coincide(&linea[index..]);
-
-                        if avance != 0 {
-                            let back= aux.len() >= min;
-                            index += avance;
-                            aux.push(PasoEvaluado {
-                                paso: paso.clone(),
-                                tam_matcheo: avance,
-                                backtrackeable: back,
-                            });
-                            pila.push(PasoEvaluado {
-                                paso: paso.clone(),
-                                tam_matcheo: avance,
-                                backtrackeable: back,
-                            });
-                            if aux.len() == max {
-                                sigo_avanzando = false;
-                            }
-                        } else {
-                            sigo_avanzando = false;
-                        }
-                    }
-
-                     if aux.len() < min  {
+                    if !Self::procesar_rango(&mut pila, &mut index, paso, linea, min, max)? {
                         return Ok(false);
                     }
                 }
