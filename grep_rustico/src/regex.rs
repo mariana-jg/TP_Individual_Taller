@@ -166,7 +166,6 @@ fn fabricar_paso_llave(
             return Err(Error::ErrorEnLlaves);
         }
     }
-
     Ok(None)
 }
 
@@ -210,16 +209,12 @@ fn fabricar_paso_mas(steps: &mut [PasoRegex]) -> Result<Option<PasoRegex>, Error
 
 fn fabricar_paso_asterisco(
     steps: &mut [PasoRegex],
-    chars_iter: &mut Chars<'_>,
 ) -> Result<Option<PasoRegex>, Error> {
     if let Some(ultimo) = steps.last_mut() {
         if no_hay_anterior(ultimo) {
             return Err(Error::ErrorEnRepeticion);
         } else {
-            match conseguir_lista(chars_iter) {
-                Ok(_) => ultimo.repeticiones = Repeticion::Alguna,
-                Err(error) => return Err(error),
-            };
+            ultimo.repeticiones = Repeticion::Alguna;
         }
     }
     Ok(None)
@@ -253,7 +248,7 @@ fn fabricar_paso_caracter(
         LLAVE_ABIERTA => fabricar_paso_llave(steps, chars_iter),
         CORCHETE_ABIERTO => fabricar_paso_corchete(chars_iter),
         INTERROGACION => fabricar_paso_interrogacion(steps),
-        ASTERISCO => fabricar_paso_asterisco(steps, chars_iter),
+        ASTERISCO => fabricar_paso_asterisco(steps),
         MAS => fabricar_paso_mas(steps),
         BARRA => fabricar_paso_barra(chars_iter),
         DOLAR => fabricar_paso_dolar(),
@@ -371,7 +366,6 @@ impl Regex {
         definir_uso_de_caret(expresion, &mut pasos);
 
         let pasos: Vec<PasoRegex> = agregar_pasos(&mut pasos, &mut chars_iter)?;
-
         Ok(Regex { pasos })
     }
 
@@ -430,8 +424,8 @@ impl Regex {
         Ok(true)
     }
 
-    ///Procesa una repetición en un rango de repeticiones.
-    fn procesar_rango(
+   /*fn procesar_rango(
+        cola: &mut VecDeque<PasoRegex>,
         pila: &mut Vec<PasoEvaluado>,
         index: &mut usize,
         paso: PasoRegex,
@@ -445,27 +439,22 @@ impl Regex {
             Some(max) => max,
             None => linea.len() - *index,
         };
-
-        let mut aux: Vec<PasoEvaluado> = Vec::new();
-
+        let mut matches = 0;
         let mut sigo_avanzando = true;
         while sigo_avanzando {
             let avance = paso.caracter_interno.coincide(&linea[*index..]);
 
             if avance != 0 {
-                let back = aux.len() >= min;
+                matches += 1;
+                let back = matches >= min;
                 *index += avance;
-                aux.push(PasoEvaluado {
-                    paso: paso.clone(),
-                    tam_matcheo: avance,
-                    backtrackeable: back,
-                });
                 pila.push(PasoEvaluado {
-                    paso: paso.clone(),
+                    paso: PasoRegex { caracter_interno: paso.caracter_interno.clone(), 
+                        repeticiones: Repeticion::Exacta(1) },
                     tam_matcheo: avance,
                     backtrackeable: back,
                 });
-                if aux.len() == max {
+                if matches == max || *index == linea.len() {
                     sigo_avanzando = false;
                 }
             } else {
@@ -473,12 +462,75 @@ impl Regex {
             }
         }
 
-        if aux.len() < min {
+        if matches < min {
             return Ok(false);
         }
 
         Ok(true)
     }
+*/
+
+fn procesar_rango(
+    cola: &mut VecDeque<PasoRegex>,
+    pila: &mut Vec<PasoEvaluado>,
+    index: &mut usize,
+    paso: PasoRegex,
+    linea: &str,
+    min: Option<usize>,
+    max: Option<usize>,
+) -> Result<bool, Error> {
+    let min = min.unwrap_or(0);
+
+    let max = match max {
+        Some(max) => max,
+        None => linea.len() - *index,
+    };
+    let mut matches = 0;
+  //  let mut backtrack_size = 0;
+    let mut sigo_avanzando = true;
+    while sigo_avanzando {
+        let avance = paso.caracter_interno.coincide(&linea[*index..]);
+
+        if avance != 0 {
+            matches += 1;
+            let back = matches >= min && matches <= max;
+          //  backtrack_size += avance;
+            /*  if back {
+                if let Some(size) = backtrack(paso.clone(), pila, cola) {
+                    *index -= size;
+                    return Ok(true);
+                } else {
+                    return Ok(false);
+                }
+            }*/
+            *index += avance;
+            pila.push(PasoEvaluado {
+                paso: PasoRegex {
+                    caracter_interno: paso.caracter_interno.clone(),
+                    repeticiones: Repeticion::Exacta(1),
+                },
+                tam_matcheo: avance,
+                backtrackeable: back,
+            });
+            if matches == max || *index == linea.len() {
+                sigo_avanzando = false;
+            }
+        } else {
+            sigo_avanzando = false;
+        }
+    }
+
+    if matches < min {
+        if let Some(size) = backtrack(paso.clone(), pila, cola) {
+            *index -= size;
+            return Ok(true);
+        } else {
+            return Ok(false);
+        }
+    }
+
+    Ok(true)
+}
 
     ///Verifica si una expresión regular es válida para una línea de texto,
     ///es el "validador" de la expresión regular.
@@ -501,7 +553,7 @@ impl Regex {
                 }
                 Repeticion::Alguna => Self::procesar_alguna(&paso, linea, &mut index, &mut pila),
                 Repeticion::Rango { min, max } => {
-                    if !Self::procesar_rango(&mut pila, &mut index, paso, linea, min, max)? {
+                    if !Self::procesar_rango(&mut cola,&mut pila, &mut index, paso, linea, min, max)? {
                         return Ok(false);
                     }
                 }
@@ -510,6 +562,7 @@ impl Regex {
         Ok(true)
     }
 }
+
 
 ///Realiza un backtrack en la expresión regular.
 fn backtrack(
@@ -664,8 +717,8 @@ mod tests {
 
     #[test]
     fn test21_llave_exacto() {
-        let regex = Regex::new("ba{2}c");
-        assert_eq!(regex.unwrap().es_valida("bac").unwrap(), false);
+        let regex = Regex::new("ba{2,3}c");
+        assert_eq!(regex.unwrap().es_valida("bac baac baaac").unwrap(), true);
     }
 
     #[test]
@@ -683,7 +736,7 @@ mod tests {
     #[test]
     fn test24_llave_rango() {
         let regex = Regex::new("ba{5,8}c");
-        assert_eq!(regex.unwrap().es_valida("baaaaac").unwrap(), true);
+        assert_eq!(regex.unwrap().es_valida("baaaaaac").unwrap(), true);
     }
 
     #[test]
@@ -770,7 +823,7 @@ mod tests {
     #[test]
     fn test38_corchete_interrogacion() {
         let regex = Regex::new("ho[a-dA-Cx-z]?a");
-        assert_eq!(regex.unwrap().es_valida("hoa").unwrap(), true);
+        assert_eq!(regex.unwrap().es_valida("esa hoa").unwrap(), true);
     }
 
     #[test]
@@ -1073,6 +1126,45 @@ mod tests {
         assert_eq!(
             Regex::es_valida_general("abc|de+f", "abdeeeeeeeeeeeeee").unwrap(),
             false
+        );
+    }
+    #[test]
+    fn test87_rangos_seguidos() {
+        assert_eq!(
+            Regex::es_valida_general("abc{2,5}d abc{1,4}d", "en medio abcccd abcd fin").unwrap(),
+            true
+        );
+    }
+
+    #[test]
+    fn test88_rangos_seguidos() {
+        assert_eq!(
+            Regex::es_valida_general("abc{2,5}d abc{0,}d", "en medio abcccccd abd fin").unwrap(),
+            true
+        );
+    }
+
+    #[test]
+    fn test89_rangos_seguidos() {
+        assert_eq!(
+            Regex::es_valida_general("abc{2,5}d abc{0,}d", "en medio abcccd abcd fin").unwrap(),
+            true
+        );
+    }
+
+    #[test]
+    fn test90_punto_question() {
+        assert_eq!(
+            Regex::es_valida_general("ab.?d", "abhhd").unwrap(),
+            false
+        );
+    }
+
+    #[test]
+    fn test91_punto_question() {
+        assert_eq!(
+            Regex::es_valida_general("ab.?d", "hola abcd chau").unwrap(),
+            true
         );
     }
 }

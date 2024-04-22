@@ -1,4 +1,4 @@
-use crate::caracter::Caracter;
+pub(crate) use crate::caracter::Caracter;
 use crate::repeticion::Repeticion;
 
 #[derive(Clone, Debug)]
