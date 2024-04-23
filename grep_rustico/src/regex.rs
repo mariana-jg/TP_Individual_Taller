@@ -422,52 +422,7 @@ impl Regex {
         Ok(true)
     }
 
-    /*fn procesar_rango(
-            cola: &mut VecDeque<PasoRegex>,
-            pila: &mut Vec<PasoEvaluado>,
-            index: &mut usize,
-            paso: PasoRegex,
-            linea: &str,
-            min: Option<usize>,
-            max: Option<usize>,
-        ) -> Result<bool, Error> {
-            let min = min.unwrap_or(0);
-
-            let max = match max {
-                Some(max) => max,
-                None => linea.len() - *index,
-            };
-            let mut matches = 0;
-            let mut sigo_avanzando = true;
-            while sigo_avanzando {
-                let avance = paso.caracter_interno.coincide(&linea[*index..]);
-
-                if avance != 0 {
-                    matches += 1;
-                    let back = matches >= min;
-                    *index += avance;
-                    pila.push(PasoEvaluado {
-                        paso: PasoRegex { caracter_interno: paso.caracter_interno.clone(),
-                            repeticiones: Repeticion::Exacta(1) },
-                        tam_matcheo: avance,
-                        backtrackeable: back,
-                    });
-                    if matches == max || *index == linea.len() {
-                        sigo_avanzando = false;
-                    }
-                } else {
-                    sigo_avanzando = false;
-                }
-            }
-
-            if matches < min {
-                return Ok(false);
-            }
-
-            Ok(true)
-        }
-    */
-
+    ///Procesa una repetición en un rango de min a max.
     fn procesar_rango(
         cola: &mut VecDeque<PasoRegex>,
         pila: &mut Vec<PasoEvaluado>,
@@ -484,23 +439,12 @@ impl Regex {
             None => linea.len() - *index,
         };
         let mut matches = 0;
-        //  let mut backtrack_size = 0;
         let mut sigo_avanzando = true;
-        while sigo_avanzando {
+        while sigo_avanzando && *index < linea.len() {
             let avance = paso.caracter_interno.coincide(&linea[*index..]);
-
             if avance != 0 {
                 matches += 1;
                 let back = matches >= min && matches <= max;
-                //  backtrack_size += avance;
-                /*  if back {
-                    if let Some(size) = backtrack(paso.clone(), pila, cola) {
-                        *index -= size;
-                        return Ok(true);
-                    } else {
-                        return Ok(false);
-                    }
-                }*/
                 *index += avance;
                 pila.push(PasoEvaluado {
                     paso: PasoRegex {
@@ -510,7 +454,7 @@ impl Regex {
                     tam_matcheo: avance,
                     backtrackeable: back,
                 });
-                if matches == max || *index == linea.len() {
+                if matches == max {
                     sigo_avanzando = false;
                 }
             } else {
