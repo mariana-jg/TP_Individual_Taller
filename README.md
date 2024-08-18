@@ -1,6 +1,14 @@
-# tp1_taller
-Taller de Programación I 
+# TallerTPIndividual
+## Taller de Programación - Cátedra Deymonazz - TP Individual
 
-Trabajo Práctico Nº1 - Individual
+### Cuatrimestre de Cursada
+1° Cuatrimestre 2024
 
-Mariana Noelia Juarez Goldemberg - Padrón: 108441
+### Puntuación de Dificultad
+**Dificultad:** ⭐⭐⭐ ☆ ☆ 3/5
+
+### Enunciado
+[Link](https://taller-1-fiuba-rust.github.io/proyecto/24C1/ejercicio_individual.html)
+
+## Contenido del Repositorio
+Este repositorio contiene la resolución del ejercicio individual de Taller de Programación.
