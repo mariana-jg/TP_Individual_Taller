@@ -11,4 +11,5 @@
 [Link](https://taller-1-fiuba-rust.github.io/proyecto/24C1/ejercicio_individual.html)
 
 ## Contenido del Repositorio
-Este repositorio contiene la resolución del ejercicio individual de Taller de Programación.
+Este repositorio contiene la resolución del ejercicio individual de Taller de Programación, donde se requería implementar
+una versión del comando **grep** la cual encuentra coincidencias de una expresión regular.
