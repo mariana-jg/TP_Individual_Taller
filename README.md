@@ -1,5 +1,4 @@
-# TallerTPIndividual
-## Taller de Programación - Cátedra Deymonazz - TP Individual
+# Taller de Programación - Cátedra Deymonazz - TP Individual
 
 ### Cuatrimestre de Cursada
 1° Cuatrimestre 2024
